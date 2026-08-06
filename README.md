@@ -1,57 +1,69 @@
 # qbit-ember
 
-Eine selbst gebaute, mobile-first Web-UI für [qBittorrent](https://www.qbittorrent.org/) —
-Ersatz für die Standard-WebUI. Dunkles Design mit rotem Akzent ("Modern Dark + Red"),
-iOS-artige Navigation, Desktop-Layout mit Sidebar + Tabelle + Detail-Spalte.
+A hand-built, mobile-first web UI for [qBittorrent](https://www.qbittorrent.org/) — a
+replacement for the stock WebUI. Dark theme with a red accent ("Modern Dark + Red"),
+iOS-style navigation, and a desktop layout with sidebar + table + detail column.
 
-Reines Frontend: kein eigenes Backend, keine Datenbank. Die App spricht ausschließlich die
-offizielle [qBittorrent WebUI API v2](https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1))
-(`/api/v2/...`), primär `sync/maindata` als Delta-Polling im 1,1s-Takt. Login läuft 1:1 über
-die qBittorrent-Zugangsdaten.
+Pure frontend: no backend of its own, no database. The app talks only to the official
+[qBittorrent WebUI API v2](https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1))
+(`/api/v2/...`), mainly `sync/maindata` for delta polling on a 1.1s interval. Login goes
+straight through your qBittorrent credentials.
 
-![Desktop-Layout](docs/screenshots/desktop.png)
+> **Note:** the interface copy is German, as specified in the design handoff.
 
-| Liste | Detail | Hinzufügen | Einstellungen |
+![Desktop layout](docs/screenshots/desktop.png)
+
+| List | Detail | Add | Settings |
 |---|---|---|---|
-| ![Torrent-Liste](docs/screenshots/mobile-liste.png) | ![Torrent-Detail](docs/screenshots/mobile-detail.png) | ![Torrent hinzufügen](docs/screenshots/mobile-hinzufuegen.png) | ![Einstellungen](docs/screenshots/mobile-einstellungen.png) |
+| ![Torrent list](docs/screenshots/mobile-liste.png) | ![Torrent detail](docs/screenshots/mobile-detail.png) | ![Add torrent](docs/screenshots/mobile-hinzufuegen.png) | ![Settings](docs/screenshots/mobile-einstellungen.png) |
 
-<sub>Screenshots mit Demo-Daten (`tools/screenshot/`), nicht mit einer echten Bibliothek.</sub>
+<sub>Screenshots use demo data (`tools/screenshot/`), not a real library.</sub>
+
+## Features
+
+- Torrent list with live search, filters, sorting and swipe actions (pause / delete)
+- Detail view with progress, transfer stats, files and trackers
+- Add torrents via magnet link, with category and derived save path
+- Light / dark / automatic theme, installable as a PWA on iOS and Android
+- Responsive: phone layout below 900px, three-column desktop above
 
 ## Stack
 
-- Angular (standalone components, Signals), TypeScript strict
-- Design-Tokens als CSS Custom Properties — Light/Dark, siehe [`design/`](design/README.md)
-- Font Awesome 6 Free (CDN), WildBreath-Display-Font
+- Angular (standalone components, signals), TypeScript strict
+- Design tokens as CSS custom properties — light/dark, see [`design/`](design/README.md)
+- Font Awesome 6 Free (CDN), WildBreath display font
 
-## Lokale Entwicklung
+## Local development
 
-`proxy.conf.json` zeigt auf eine echte qBittorrent-Instanz (Same-Origin-Trick, kein CORS):
+`proxy.conf.json` points at a real qBittorrent instance (same-origin trick, no CORS).
+Change the target to your own instance:
 
 ```json
-{ "/api": { "target": "http://192.168.178.165:8090", "changeOrigin": true } }
+{ "/api": { "target": "http://qbittorrent.local:8080", "changeOrigin": true } }
 ```
 
 ```bash
 npm ci
-npx ng serve        # http://localhost:4200, /api/v2/* wird zur Instanz geproxied
+npx ng serve        # http://localhost:4200, /api/v2/* is proxied to your instance
 ```
 
 ## Build & Docker
 
-Ein einziger Container: Multi-Stage-Build (Node → nginx:alpine). nginx lauscht auf Port
-**8091**, liefert den statischen Build aus und reverse-proxied `/api/v2/` auf das per
-`QBIT_API_URL` konfigurierte Backend (Default `http://gluetun:8080` — der
-qBittorrent-Standard-WebUI-Port) — kein CORS-Setup nötig.
+A single self-contained container: multi-stage build (Node → nginx:alpine). nginx listens
+on port **8091**, serves the static build and reverse-proxies `/api/v2/` to the backend
+configured via `QBIT_API_URL` (default `http://gluetun:8080`, the standard qBittorrent
+WebUI port). No CORS setup required.
 
 ```bash
 docker build -t qbit-ember .
-docker run -p 8091:8091 -e QBIT_API_URL=http://192.168.178.165:8080 qbit-ember
+docker run -p 8091:8091 -e QBIT_API_URL=http://qbittorrent.local:8080 qbit-ember
 ```
 
-Bei Push auf `main` (bzw. Tags `v*`) baut GitHub Actions ein Multi-Arch-Image
-(`linux/arm64` + `linux/amd64`) und pusht es nach GHCR — der Pi baut nichts selbst.
+On push to `main` (or on `v*` tags) GitHub Actions builds a multi-arch image
+(`linux/arm64` + `linux/amd64`) and pushes it to GHCR, so low-powered hosts like a
+Raspberry Pi never have to build it themselves.
 
-## Deployment (docker-compose / Komodo)
+## Deployment (docker compose / Komodo)
 
 ```yaml
 services:
@@ -59,25 +71,25 @@ services:
     image: ghcr.io/dragonmasta37070/qbit-ember:latest
     container_name: qbit-ember
     environment:
-      - QBIT_API_URL=http://gluetun:8080   # qBittorrent-WebUI hinter Gluetun
+      - QBIT_API_URL=http://gluetun:8080   # qBittorrent WebUI behind Gluetun
     ports:
       - "8091:8091"
     networks:
-      - gluetun-net          # dasselbe Netzwerk wie der gluetun-Container
+      - gluetun-net          # same network as the gluetun container
     restart: unless-stopped
-    # ports weglassen, wenn ein vorgelagerter Reverse-Proxy (nginx)
-    # auf einer eigenen Subdomain auf qbit-ember:8091 zeigt
+    # drop `ports` if an upstream reverse proxy (nginx) serves
+    # qbit-ember:8091 on its own subdomain
 ```
 
-Hinweis: nginx löst den `QBIT_API_URL`-Hostnamen beim Start auf — der `gluetun`-Container
-muss also laufen, bevor `qbit-ember` startet (`depends_on` bzw. Stack-Reihenfolge in Komodo).
+Note: nginx resolves the `QBIT_API_URL` hostname at startup, so the `gluetun` container
+has to be running before `qbit-ember` starts (`depends_on`, or stack order in Komodo).
 
 ## Design
 
-Der komplette High-Fidelity-Designhandoff (Tokens, Screens, Style Guide, interaktive
-Prototypen) liegt unter [`design/`](design/README.md) und ist die verbindliche Referenz
-für Farben, Komponenten und Verhalten — auch für spätere Änderungen.
+The full high-fidelity design handoff (tokens, screens, style guide, interactive
+prototypes) lives in [`design/`](design/README.md) and is the authoritative reference for
+colours, components and behaviour — including for future changes.
 
-## Lizenz
+## License
 
 [MIT](LICENSE)
