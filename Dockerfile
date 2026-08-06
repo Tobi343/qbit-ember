@@ -11,5 +11,5 @@ FROM nginx:alpine
 COPY --from=build /app/dist/qbit-ember/browser /usr/share/nginx/html
 # The official nginx image runs envsubst on /etc/nginx/templates/*.template at startup
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
-ENV QBIT_API_URL=http://gluetun:8090
-EXPOSE 80
+ENV QBIT_API_URL=http://gluetun:8080
+EXPOSE 8091

@@ -32,13 +32,14 @@ npx ng serve        # http://localhost:4200, /api/v2/* wird zur Instanz geproxie
 
 ## Build & Docker
 
-Ein einziger Container: Multi-Stage-Build (Node → nginx:alpine). nginx liefert den statischen
-Build aus und reverse-proxied `/api/v2/` auf das per `QBIT_API_URL` konfigurierte Backend
-(Default `http://gluetun:8090`) — kein CORS-Setup nötig.
+Ein einziger Container: Multi-Stage-Build (Node → nginx:alpine). nginx lauscht auf Port
+**8091**, liefert den statischen Build aus und reverse-proxied `/api/v2/` auf das per
+`QBIT_API_URL` konfigurierte Backend (Default `http://gluetun:8080` — der
+qBittorrent-Standard-WebUI-Port) — kein CORS-Setup nötig.
 
 ```bash
 docker build -t qbit-ember .
-docker run -p 8080:80 -e QBIT_API_URL=http://192.168.178.165:8090 qbit-ember
+docker run -p 8091:8091 -e QBIT_API_URL=http://192.168.178.165:8080 qbit-ember
 ```
 
 Bei Push auf `main` (bzw. Tags `v*`) baut GitHub Actions ein Multi-Arch-Image
@@ -52,12 +53,14 @@ services:
     image: ghcr.io/dragonmasta37070/qbit-ember:latest
     container_name: qbit-ember
     environment:
-      - QBIT_API_URL=http://gluetun:8090
+      - QBIT_API_URL=http://gluetun:8080   # qBittorrent-WebUI hinter Gluetun
+    ports:
+      - "8091:8091"
     networks:
       - gluetun-net          # dasselbe Netzwerk wie der gluetun-Container
     restart: unless-stopped
-    # kein Port-Publish nötig, wenn ein vorgelagerter Reverse-Proxy (nginx)
-    # auf einer eigenen Subdomain auf qbit-ember:80 zeigt
+    # ports weglassen, wenn ein vorgelagerter Reverse-Proxy (nginx)
+    # auf einer eigenen Subdomain auf qbit-ember:8091 zeigt
 ```
 
 Hinweis: nginx löst den `QBIT_API_URL`-Hostnamen beim Start auf — der `gluetun`-Container
