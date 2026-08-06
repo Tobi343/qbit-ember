@@ -258,77 +258,6 @@
   </div>
 }
 
-<!-- ── Screen 3: Einstellungen (design/README.md §3) ── -->
-@if (screen() === 'settings') {
-  <div class="push-screen" [class.is-closing]="closing()">
-    <nav class="navbar navbar--plain">
-      <button class="nav-back" (click)="back()">
-        <i class="fa-solid fa-chevron-left"></i> Torrents
-      </button>
-    </nav>
-    <div class="detail-scroll">
-      <h1 class="settings-title">Einstellungen</h1>
-
-      <div class="conn-card">
-        <div class="conn-icon"><i class="fa-solid fa-check"></i></div>
-        <div>
-          <div class="conn-title">Verbunden</div>
-          <div class="conn-sub">{{ host }} · qBittorrent {{ api.server().version || '…' }}</div>
-        </div>
-      </div>
-
-      <div class="group-caption">Geschwindigkeit</div>
-      <div class="info-card">
-        <button class="setting-row" (click)="api.toggleAltLimits()">
-          <span>Alternative Limits</span>
-          <span class="switch" [class.is-on]="api.altLimits()"><span class="knob"></span></span>
-        </button>
-        <div class="setting-row">
-          <span>Download-Limit</span>
-          <span class="setting-value">{{ limitLabel(api.dlLimit()) }}</span>
-        </div>
-        <div class="setting-row">
-          <span>Upload-Limit</span>
-          <span class="setting-value">{{ limitLabel(api.upLimit()) }}</span>
-        </div>
-      </div>
-
-      <div class="group-caption">Darstellung</div>
-      <div class="info-card seg-card">
-        <div class="segmented segmented--full">
-          @for (th of themes; track th) {
-            <button [class.is-active]="theme() === th" (click)="theme.set(th)">{{ THEME_LABEL[th] }}</button>
-          }
-        </div>
-      </div>
-
-      <div class="group-caption">Verhalten</div>
-      <div class="info-card">
-        <button class="setting-row" (click)="toggleBehave('resume')">
-          <span class="setting-stack">
-            <span>Beim Start fortsetzen</span>
-            <span class="setting-sub">Pausierte Torrents automatisch starten</span>
-          </span>
-          <span class="switch" [class.is-on]="behave().resume"><span class="knob"></span></span>
-        </button>
-        <button class="setting-row" (click)="toggleBehave('notify')">
-          <span class="setting-stack">
-            <span>Benachrichtigungen</span>
-            <span class="setting-sub">Bei fertigen Downloads melden</span>
-          </span>
-          <span class="switch" [class.is-on]="behave().notify"><span class="knob"></span></span>
-        </button>
-        <button class="setting-row" (click)="toggleBehave('wifi')">
-          <span class="setting-stack">
-            <span>Nur im WLAN</span>
-            <span class="setting-sub">Downloads nur über WLAN laden</span>
-          </span>
-          <span class="switch" [class.is-on]="behave().wifi"><span class="knob"></span></span>
-        </button>
-      </div>
-    </div>
-  </div>
-}
 } @else {
 <!-- ── Screen 7: Desktop (design/README.md §7) ── -->
 <div class="desktop">
@@ -390,6 +319,9 @@
         <span class="toolbar-sub">{{ counts()['all'] }} gesamt · {{ counts()['active'] }} aktiv</span>
       </div>
       <div class="toolbar-actions">
+        <button class="btn-icon" aria-label="Einstellungen" (click)="pushScreen('settings')">
+          <i class="fa-solid fa-gear"></i>
+        </button>
         <button class="btn-secondary" (click)="toggleMenu('sort-desktop')">
           <i class="fa-solid fa-arrow-down-wide-short"></i> Sortieren
         </button>
@@ -504,15 +436,99 @@
 </div>
 }
 
+<!-- ── Screen 3: Einstellungen (design/README.md §3) ── -->
+@if (screen() === 'settings') {
+  <div class="push-screen" [class.is-closing]="closing()">
+    <nav class="navbar navbar--plain">
+      <button class="nav-back" (click)="back()">
+        <i class="fa-solid fa-chevron-left"></i> Torrents
+      </button>
+    </nav>
+    <div class="detail-scroll">
+      <h1 class="settings-title">Einstellungen</h1>
+
+      <div class="conn-card">
+        <div class="conn-icon"><i class="fa-solid fa-check"></i></div>
+        <div>
+          <div class="conn-title">Verbunden</div>
+          <div class="conn-sub">{{ host }} · qBittorrent {{ api.server().version || '…' }}</div>
+        </div>
+      </div>
+
+      <div class="group-caption">Geschwindigkeit</div>
+      <div class="info-card">
+        <button class="setting-row" (click)="api.toggleAltLimits()">
+          <span>Alternative Limits</span>
+          <span class="switch" [class.is-on]="api.altLimits()"><span class="knob"></span></span>
+        </button>
+        <div class="setting-row">
+          <span>Download-Limit</span>
+          <span class="setting-value">{{ limitLabel(api.dlLimit()) }}</span>
+        </div>
+        <div class="setting-row">
+          <span>Upload-Limit</span>
+          <span class="setting-value">{{ limitLabel(api.upLimit()) }}</span>
+        </div>
+      </div>
+
+      <div class="group-caption">Darstellung</div>
+      <div class="info-card seg-card">
+        <div class="segmented segmented--full">
+          @for (th of themes; track th) {
+            <button [class.is-active]="theme() === th" (click)="theme.set(th)">{{ THEME_LABEL[th] }}</button>
+          }
+        </div>
+      </div>
+
+      <div class="group-caption">Verhalten</div>
+      <div class="info-card">
+        <button class="setting-row" (click)="toggleBehave('resume')">
+          <span class="setting-stack">
+            <span>Beim Start fortsetzen</span>
+            <span class="setting-sub">Pausierte Torrents automatisch starten</span>
+          </span>
+          <span class="switch" [class.is-on]="behave().resume"><span class="knob"></span></span>
+        </button>
+        <button class="setting-row" (click)="toggleBehave('notify')">
+          <span class="setting-stack">
+            <span>Benachrichtigungen</span>
+            <span class="setting-sub">Bei fertigen Downloads melden</span>
+          </span>
+          <span class="switch" [class.is-on]="behave().notify"><span class="knob"></span></span>
+        </button>
+        <button class="setting-row" (click)="toggleBehave('wifi')">
+          <span class="setting-stack">
+            <span>Nur im WLAN</span>
+            <span class="setting-sub">Downloads nur über WLAN laden</span>
+          </span>
+          <span class="switch" [class.is-on]="behave().wifi"><span class="knob"></span></span>
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
 <!-- ── Screen 4: Add-Sheet (design/README.md §4) ── -->
 @if (sheet() === 'add') {
   <div class="sheet-scrim" [class.is-closing]="sheetClosing()" (click)="closeSheet()"></div>
-  <div class="add-sheet" [class.is-closing]="sheetClosing()">
-    <div class="grab-handle"></div>
-    <div class="sheet-head">
-      <button class="sheet-cancel" (click)="closeSheet()">Abbrechen</button>
-      <div class="sheet-title">Torrent hinzufügen</div>
-      <button class="sheet-done" (click)="confirmAdd()">Fertig</button>
+  <div
+    class="add-sheet"
+    [class.is-dragging]="sheetDragging()"
+    [style.transform]="'translate(-50%, ' + sheetDragY() + 'px)'"
+  >
+    <div
+      class="sheet-grip"
+      (pointerdown)="onSheetDown($event)"
+      (pointermove)="onSheetMove($event)"
+      (pointerup)="onSheetUp()"
+      (pointercancel)="onSheetUp()"
+    >
+      <div class="grab-handle"></div>
+      <div class="sheet-head">
+        <button class="sheet-cancel" (click)="closeSheet()">Abbrechen</button>
+        <div class="sheet-title">Torrent hinzufügen</div>
+        <button class="sheet-done" (click)="confirmAdd()">Fertig</button>
+      </div>
     </div>
     <div class="sheet-body">
       <div class="info-card sheet-field">

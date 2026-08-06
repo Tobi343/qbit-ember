@@ -238,14 +238,17 @@ export class QbitApiService {
     this.torrents.update(list => list.filter(t => t.hash !== hash));
   }
 
+  // torrents/add verlangt multipart/form-data — urlencoded wird still verworfen
   async add(magnet: string, category: string, startNow: boolean): Promise<boolean> {
-    const r = await this.post('torrents/add', {
-      urls: magnet,
-      category,
-      stopped: String(!startNow),
-      paused: String(!startNow), // pre-5.x name, ignored by 5.x
-    });
-    return r.ok;
+    const fd = new FormData();
+    fd.append('urls', magnet);
+    if (category) fd.append('category', category);
+    fd.append('stopped', String(!startNow));
+    fd.append('paused', String(!startNow)); // pre-5.x name, von 5.x ignoriert
+    const r = await fetch('/api/v2/torrents/add', { method: 'POST', body: fd });
+    if (!r.ok) return false;
+    this.rid = 0; // nächster Poll liefert ein full_update mit dem neuen Torrent
+    return !(await r.text()).startsWith('Fails');
   }
 
   async reannounce(hash: string): Promise<void> {

@@ -40,7 +40,8 @@ const STATE_RANK: Record<UiState, number> = {
 const RING_C = 87.96; // 2π·14 — 34px ring, 3px stroke (design/README.md)
 const NO_CAT = '__none__';
 const NO_TAG = '__none__';
-const PUSH_MS = 300; // Push-Screen-Animation (design motion table)
+const PUSH_MS = 300;  // Push-Screen-Animation (design motion table)
+const SHEET_MS = 340; // Sheet up/down
 
 interface Behave { resume: boolean; notify: boolean; wifi: boolean; }
 
@@ -92,6 +93,8 @@ export class AppComponent {
   readonly sel = signal<string | null>(null);
   readonly sheet = signal<null | 'add' | 'del'>(null);
   readonly sheetClosing = signal(false);
+  readonly sheetDragY = signal(0);
+  readonly sheetDragging = signal(false);
   readonly delTarget = signal<Torrent | null>(null);
   readonly delFiles = signal(false);
   readonly magnet = signal('');
@@ -367,17 +370,48 @@ export class AppComponent {
     this.addCat.set('');
     this.startNow.set(true);
     this.sheetClosing.set(false);
+    this.sheetDragY.set(0);
     this.sheet.set('add');
+    if (!this.api.defaultSavePath()) void this.api.fetchSettings();
   }
 
   closeSheet(): void {
     this.sheetClosing.set(true);
-    setTimeout(() => { this.sheet.set(null); this.sheetClosing.set(false); }, 340);
+    this.sheetDragY.set(window.innerHeight);
+    setTimeout(() => {
+      this.sheet.set(null);
+      this.sheetClosing.set(false);
+      this.sheetDragY.set(0);
+    }, SHEET_MS);
+  }
+
+  // ── Sheet nach unten wischen zum Schließen ───────────────
+  private sheetStartY = 0;
+
+  onSheetDown(ev: PointerEvent): void {
+    this.sheetStartY = ev.clientY;
+    this.sheetDragging.set(true);
+    (ev.target as Element).setPointerCapture?.(ev.pointerId);
+  }
+
+  onSheetMove(ev: PointerEvent): void {
+    if (!this.sheetDragging()) return;
+    this.sheetDragY.set(Math.max(0, ev.clientY - this.sheetStartY));
+  }
+
+  onSheetUp(): void {
+    if (!this.sheetDragging()) return;
+    this.sheetDragging.set(false);
+    if (this.sheetDragY() > 110) this.closeSheet();
+    else this.sheetDragY.set(0);
   }
 
   async confirmAdd(): Promise<void> {
     const magnet = this.magnet().trim();
-    if (!magnet) return;
+    if (!magnet) {
+      this.toast('Magnet-Link fehlt');
+      return;
+    }
     const ok = await this.api.add(magnet, this.addCat(), this.startNow());
     this.closeSheet();
     this.toast(ok ? 'Torrent hinzugefügt' : 'Hinzufügen fehlgeschlagen');

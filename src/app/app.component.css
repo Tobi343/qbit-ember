@@ -984,10 +984,12 @@ h1 {
   background: var(--bg);
   border-radius: 22px 22px 0 0;
   animation: sheet-slide-up 340ms var(--push-ease);
+  transition: transform 340ms var(--push-ease);
 }
-.add-sheet.is-closing { animation: sheet-slide-down 340ms var(--push-ease) forwards; }
+.add-sheet.is-dragging { transition: none; }
 @keyframes sheet-slide-up { from { transform: translate(-50%, 100%); } to { transform: translate(-50%, 0); } }
-@keyframes sheet-slide-down { from { transform: translate(-50%, 0); } to { transform: translate(-50%, 100%); } }
+.sheet-grip { flex-shrink: 0; touch-action: none; cursor: grab; }
+.sheet-grip:active { cursor: grabbing; }
 .grab-handle {
   width: 36px;
   height: 5px;
@@ -1051,3 +1053,21 @@ h1 {
 }
 .add-confirm:disabled { opacity: 0.45; }
 .add-confirm:active:not(:disabled) { transform: scale(0.98); }
+
+/* Icon-Button im Desktop-Toolbar (Einstellungen) */
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--fill);
+  color: var(--ac);
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+}
+
+/* Push-Screens auf dem Desktop mittig begrenzen */
+@media (min-width: 900px) {
+  .push-screen .detail-scroll,
+  .push-screen .navbar { max-width: 640px; margin-left: auto; margin-right: auto; width: 100%; }
+}
