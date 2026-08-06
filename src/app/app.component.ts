@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
-import { QbitApiService, STATE_COLOR, STATE_LABEL, Torrent, UiState } from './qbit-api.service';
+import { QbitApiService, STATE_COLOR, STATE_LABEL, Torrent, TorrentFile, Tracker, UiState } from './qbit-api.service';
 import { fmtBytes, fmtDate, fmtEta, fmtRatio, fmtSpeed, techLine } from './format';
 
 type Filter = 'active' | 'all' | 'down' | 'done' | 'paused' | 'seeding' | 'completed' | 'stalled' | 'error';
@@ -40,6 +40,9 @@ const STATE_RANK: Record<UiState, number> = {
 const RING_C = 87.96; // 2π·14 — 34px ring, 3px stroke (design/README.md)
 const NO_CAT = '__none__';
 const NO_TAG = '__none__';
+const PUSH_MS = 300; // Push-Screen-Animation (design motion table)
+
+interface Behave { resume: boolean; notify: boolean; wifi: boolean; }
 
 @Component({
   selector: 'app-root',
@@ -63,6 +66,10 @@ export class AppComponent {
   readonly filters: Filter[] = ['active', 'all', 'down', 'done', 'paused'];
   readonly sideFilters: Filter[] = ['all', 'down', 'seeding', 'completed', 'paused', 'stalled', 'error'];
   readonly sorts: Sort[] = ['status', 'name', 'size', 'progress'];
+  readonly themes: Theme[] = ['light', 'dark', 'auto'];
+  readonly THEME_LABEL: Record<Theme, string> = { light: 'Hell', dark: 'Dunkel', auto: 'Automatisch' };
+  readonly dtabs = ['info', 'files', 'trackers'] as const;
+  readonly DTAB_LABEL = { info: 'Info', files: 'Dateien', trackers: 'Tracker' };
   readonly fmtBytes = fmtBytes;
   readonly fmtSpeed = fmtSpeed;
   readonly fmtRatio = fmtRatio;
@@ -71,6 +78,9 @@ export class AppComponent {
   readonly host = location.host;
 
   // ── State (design/README.md "State") ─────────────────────
+  readonly screen = signal<'list' | 'detail' | 'settings'>('list');
+  readonly closing = signal(false);            // push-screen exit animation
+  readonly dtab = signal<'info' | 'files' | 'trackers'>('info');
   readonly filter = signal<Filter>('active');
   readonly sideFilter = signal<Filter>('all');
   readonly catFilter = signal<string | null>(null);   // desktop sidebar
@@ -80,15 +90,24 @@ export class AppComponent {
   readonly menu = signal<null | 'filter' | 'sort' | 'sort-desktop'>(null);
   readonly q = signal('');
   readonly sel = signal<string | null>(null);
-  readonly sheet = signal<null | 'del'>(null);
+  readonly sheet = signal<null | 'add' | 'del'>(null);
+  readonly sheetClosing = signal(false);
   readonly delTarget = signal<Torrent | null>(null);
   readonly delFiles = signal(false);
-  readonly open = signal<string | null>(null);   // swipe-open row hash
-  readonly dragX = signal(0);                    // live drag offset of drag target
+  readonly magnet = signal('');
+  readonly addCat = signal('');                // '' = Keine
+  readonly startNow = signal(true);
+  readonly open = signal<string | null>(null); // swipe-open row hash
+  readonly dragX = signal(0);                  // live drag offset of drag target
   readonly dragging = signal<string | null>(null);
   readonly toastMsg = signal('');
   readonly theme = signal<Theme>((localStorage.getItem('theme') as Theme) ?? 'auto');
   readonly isDesktop = signal(matchMedia('(min-width: 900px)').matches);
+  // ponytail: die drei Verhalten-Switches sind reine UI-Präferenzen, nur localStorage
+  readonly behave = signal<Behave>(JSON.parse(localStorage.getItem('behave') ?? '{"resume":true,"notify":false,"wifi":false}'));
+
+  readonly files = signal<TorrentFile[]>([]);
+  readonly trackers = signal<Tracker[]>([]);
 
   readonly loginUser = signal('');
   readonly loginPass = signal('');
@@ -147,17 +166,29 @@ export class AppComponent {
     return this.dir() === -1 ? list.reverse() : list;
   });
 
+  // desktop detail column: selection or first visible
   readonly selected = computed(() => {
     const hash = this.sel();
     const list = this.visible();
     return list.find(t => t.hash === hash) ?? list[0] ?? null;
   });
 
+  // mobile detail screen: live view of the selected torrent, independent of filters
+  readonly detailTorrent = computed(() => {
+    const hash = this.sel();
+    return this.api.torrents().find(t => t.hash === hash) ?? null;
+  });
+
+  // add sheet: derived save path (design §4 "ZIEL")
+  readonly addSavePath = computed(() =>
+    (this.addCat() ? this.api.catPaths()[this.addCat()] : '') || this.api.defaultSavePath() || '–');
+
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
   private mql = matchMedia('(prefers-color-scheme: dark)');
 
   constructor() {
     effect(() => this.applyTheme(this.theme()));
+    effect(() => localStorage.setItem('behave', JSON.stringify(this.behave())));
     this.mql.addEventListener('change', () => this.applyTheme(this.theme()));
     const dq = matchMedia('(min-width: 900px)');
     dq.addEventListener('change', e => this.isDesktop.set(e.matches));
@@ -179,8 +210,17 @@ export class AppComponent {
 
   pct(t: Torrent): string { return `${Math.round(t.progress * 100)} %`; }
 
+  shortTitle(t: Torrent): string {
+    const clean = t.name.replace(/[._]/g, ' ');
+    return clean.length > 32 ? clean.slice(0, 32) + '…' : clean;
+  }
+
   trackerHost(t: Torrent): string {
     try { return new URL(t.tracker).hostname; } catch { return t.tracker || '–'; }
+  }
+
+  fileName(f: TorrentFile): string {
+    return f.name.split('/').pop() ?? f.name;
   }
 
   statusDetail(t: Torrent): string {
@@ -194,6 +234,22 @@ export class AppComponent {
       case 'paused': return `${fmtBytes(t.completed)} geladen`;
       case 'error': return 'Fehler';
     }
+  }
+
+  limitLabel(bytesPerSec: number): string {
+    return bytesPerSec > 0 ? fmtSpeed(bytesPerSec) : '∞';
+  }
+
+  // ── Navigation (push 300ms) ──────────────────────────────
+  pushScreen(s: 'detail' | 'settings'): void {
+    this.closing.set(false);
+    this.screen.set(s);
+    if (s === 'settings') void this.api.fetchSettings();
+  }
+
+  back(): void {
+    this.closing.set(true);
+    setTimeout(() => { this.screen.set('list'); this.closing.set(false); }, PUSH_MS);
   }
 
   // ── Swipe (open −152, threshold −70, max −176, <5px = tap) ──
@@ -245,8 +301,19 @@ export class AppComponent {
   }
 
   openDetail(t: Torrent): void {
-    // Screen 2 (Detail) kommt als Nächstes
     this.sel.set(t.hash);
+    this.dtab.set('info');
+    this.files.set([]);
+    this.trackers.set([]);
+    this.pushScreen('detail');
+  }
+
+  pickDtab(tab: 'info' | 'files' | 'trackers'): void {
+    this.dtab.set(tab);
+    const t = this.detailTorrent();
+    if (!t) return;
+    if (tab === 'files' && !this.files().length) void this.api.files(t.hash).then(f => this.files.set(f));
+    if (tab === 'trackers' && !this.trackers().length) void this.api.trackers(t.hash).then(tr => this.trackers.set(tr));
   }
 
   async togglePause(t: Torrent): Promise<void> {
@@ -265,6 +332,16 @@ export class AppComponent {
     this.toast('Neu gemeldet');
   }
 
+  async share(t: Torrent): Promise<void> {
+    const link = t.magnetUri || t.name;
+    if (navigator.share) {
+      try { await navigator.share({ title: t.name, url: t.magnetUri || undefined, text: t.magnetUri ? undefined : t.name }); } catch { /* abgebrochen */ }
+    } else {
+      await navigator.clipboard.writeText(link);
+      this.toast('Link kopiert');
+    }
+  }
+
   askDelete(t: Torrent): void {
     this.open.set(null);
     this.delTarget.set(t);
@@ -280,7 +357,34 @@ export class AppComponent {
     this.sheet.set(null);
     this.delTarget.set(null);
     if (this.sel() === t.hash) this.sel.set(null);
+    if (this.screen() === 'detail') this.back();
     this.toast(withFiles ? 'Torrent und Dateien gelöscht' : 'Torrent entfernt');
+  }
+
+  // ── Add sheet (design §4) ────────────────────────────────
+  openAdd(): void {
+    this.magnet.set('');
+    this.addCat.set('');
+    this.startNow.set(true);
+    this.sheetClosing.set(false);
+    this.sheet.set('add');
+  }
+
+  closeSheet(): void {
+    this.sheetClosing.set(true);
+    setTimeout(() => { this.sheet.set(null); this.sheetClosing.set(false); }, 340);
+  }
+
+  async confirmAdd(): Promise<void> {
+    const magnet = this.magnet().trim();
+    if (!magnet) return;
+    const ok = await this.api.add(magnet, this.addCat(), this.startNow());
+    this.closeSheet();
+    this.toast(ok ? 'Torrent hinzugefügt' : 'Hinzufügen fehlgeschlagen');
+  }
+
+  toggleBehave(key: keyof Behave): void {
+    this.behave.update(b => ({ ...b, [key]: !b[key] }));
   }
 
   toggleMenu(which: 'filter' | 'sort' | 'sort-desktop'): void {

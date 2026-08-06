@@ -8,10 +8,10 @@
         <h1>Torrents</h1>
       </div>
       <div class="head-actions">
-        <button class="circle circle--gear" aria-label="Einstellungen">
+        <button class="circle circle--gear" aria-label="Einstellungen" (click)="pushScreen('settings')">
           <i class="fa-solid fa-gear"></i>
         </button>
-        <button class="circle circle--add" aria-label="Torrent hinzufügen">
+        <button class="circle circle--add" aria-label="Torrent hinzufügen" (click)="openAdd()">
           <i class="fa-solid fa-plus"></i>
         </button>
       </div>
@@ -145,6 +145,190 @@
     }
   </main>
 </div>
+
+<!-- ── Screen 2: Torrent-Detail (design/README.md §2) ── -->
+@if (screen() === 'detail' && detailTorrent(); as t) {
+  <div class="push-screen" [class.is-closing]="closing()">
+    <nav class="navbar">
+      <button class="nav-back" (click)="back()">
+        <i class="fa-solid fa-chevron-left"></i> Torrents
+      </button>
+      <div class="nav-title">{{ shortTitle(t) }}</div>
+      <button class="nav-more" aria-label="Optionen" (click)="askDelete(t)">
+        <i class="fa-solid fa-ellipsis-vertical"></i>
+      </button>
+    </nav>
+
+    <div class="detail-scroll">
+      <div class="detail-header">
+        <div class="detail-title">{{ t.name }}</div>
+        <div class="detail-tech">{{ techLine(t) }}</div>
+      </div>
+
+      <div class="progress-card">
+        <div class="pc-top">
+          <span class="pc-pct" [style.color]="'var(' + STATE_COLOR[t.state] + ')'">{{ pct(t) }}</span>
+          <span class="pc-of">{{ fmtBytes(t.completed) }} von {{ fmtBytes(t.size) }}</span>
+        </div>
+        <div class="pc-track">
+          <div class="pc-fill" [style.width.%]="t.progress * 100" [style.background]="'var(' + STATE_COLOR[t.state] + ')'"></div>
+        </div>
+        <div class="pc-stats">
+          <div>
+            <div class="pc-label">Download</div>
+            <div class="pc-value" style="color: var(--dl)">{{ fmtSpeed(t.dlspeed) }}</div>
+          </div>
+          <div>
+            <div class="pc-label">Upload</div>
+            <div class="pc-value" style="color: var(--ok)">{{ fmtSpeed(t.upspeed) }}</div>
+          </div>
+          <div>
+            <div class="pc-label">Rest</div>
+            <div class="pc-value">{{ fmtBytes(t.size - t.completed) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="action-card" (click)="togglePause(t)">
+          <i class="fa-solid" [class]="t.state === 'paused' ? 'fa-play' : 'fa-pause'"></i>
+          {{ t.state === 'paused' ? 'Starten' : 'Pausieren' }}
+        </button>
+        <button class="action-card" (click)="reannounce(t)">
+          <i class="fa-solid fa-tower-broadcast"></i> Neu melden
+        </button>
+        <button class="action-card" (click)="share(t)">
+          <i class="fa-solid fa-arrow-up-from-bracket"></i> Teilen
+        </button>
+        <button class="action-card action-card--bad" (click)="askDelete(t)">
+          <i class="fa-solid fa-trash"></i> Löschen
+        </button>
+      </div>
+
+      <div class="segmented">
+        @for (tab of dtabs; track tab) {
+          <button [class.is-active]="dtab() === tab" (click)="pickDtab(tab)">{{ DTAB_LABEL[tab] }}</button>
+        }
+      </div>
+
+      @if (dtab() === 'info') {
+        <div class="info-card">
+          <div class="info-row"><span>Status</span><span [style.color]="'var(' + STATE_COLOR[t.state] + ')'">{{ STATE_LABEL[t.state] }}</span></div>
+          <div class="info-row"><span>Kategorie</span><span>{{ t.category || '–' }}</span></div>
+          <div class="info-row"><span>Verhältnis</span><span>{{ fmtRatio(t.ratio) }}</span></div>
+          <div class="info-row"><span>Seeds</span><span>{{ t.seeds }}</span></div>
+          <div class="info-row"><span>Peers</span><span>{{ t.peers }}</span></div>
+          <div class="info-row"><span>Hinzugefügt</span><span>{{ fmtDate(t.addedOn) }}</span></div>
+          <div class="info-row"><span>Speicherpfad</span><span class="info-mono">{{ t.savePath }}</span></div>
+          <div class="info-row"><span>Hash</span><span class="info-mono">{{ t.hash }}</span></div>
+        </div>
+      } @else if (dtab() === 'files') {
+        <div class="info-card">
+          @for (f of files(); track f.name) {
+            <div class="file-row">
+              <div class="file-top">
+                <span class="file-name">{{ fileName(f) }}</span>
+                <span class="file-size">{{ fmtBytes(f.size) }}</span>
+              </div>
+              <div class="file-track">
+                <div class="file-fill" [style.width.%]="f.progress * 100"
+                     [style.background]="f.progress >= 1 ? 'var(--ok)' : 'var(--dl)'"></div>
+              </div>
+            </div>
+          } @empty {
+            <div class="empty"><div class="empty-sub">Lade Dateien …</div></div>
+          }
+        </div>
+      } @else {
+        <div class="info-card">
+          @for (tr of trackers(); track tr.url) {
+            <div class="tracker-row">
+              <span class="tracker-dot" [style.background]="tr.status === 2 ? 'var(--ok)' : tr.status === 4 ? 'var(--bad)' : 'var(--t3)'"></span>
+              <div class="tracker-text">
+                <div class="tracker-url">{{ tr.url }}</div>
+                <div class="tracker-sub">{{ tr.status === 2 ? 'Aktiv' : tr.status === 4 ? 'Nicht erreichbar' : 'Nicht kontaktiert' }} · {{ tr.peers }} Peers</div>
+              </div>
+            </div>
+          } @empty {
+            <div class="empty"><div class="empty-sub">Lade Tracker …</div></div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- ── Screen 3: Einstellungen (design/README.md §3) ── -->
+@if (screen() === 'settings') {
+  <div class="push-screen" [class.is-closing]="closing()">
+    <nav class="navbar navbar--plain">
+      <button class="nav-back" (click)="back()">
+        <i class="fa-solid fa-chevron-left"></i> Torrents
+      </button>
+    </nav>
+    <div class="detail-scroll">
+      <h1 class="settings-title">Einstellungen</h1>
+
+      <div class="conn-card">
+        <div class="conn-icon"><i class="fa-solid fa-check"></i></div>
+        <div>
+          <div class="conn-title">Verbunden</div>
+          <div class="conn-sub">{{ host }} · qBittorrent {{ api.server().version || '…' }}</div>
+        </div>
+      </div>
+
+      <div class="group-caption">Geschwindigkeit</div>
+      <div class="info-card">
+        <button class="setting-row" (click)="api.toggleAltLimits()">
+          <span>Alternative Limits</span>
+          <span class="switch" [class.is-on]="api.altLimits()"><span class="knob"></span></span>
+        </button>
+        <div class="setting-row">
+          <span>Download-Limit</span>
+          <span class="setting-value">{{ limitLabel(api.dlLimit()) }}</span>
+        </div>
+        <div class="setting-row">
+          <span>Upload-Limit</span>
+          <span class="setting-value">{{ limitLabel(api.upLimit()) }}</span>
+        </div>
+      </div>
+
+      <div class="group-caption">Darstellung</div>
+      <div class="info-card seg-card">
+        <div class="segmented segmented--full">
+          @for (th of themes; track th) {
+            <button [class.is-active]="theme() === th" (click)="theme.set(th)">{{ THEME_LABEL[th] }}</button>
+          }
+        </div>
+      </div>
+
+      <div class="group-caption">Verhalten</div>
+      <div class="info-card">
+        <button class="setting-row" (click)="toggleBehave('resume')">
+          <span class="setting-stack">
+            <span>Beim Start fortsetzen</span>
+            <span class="setting-sub">Pausierte Torrents automatisch starten</span>
+          </span>
+          <span class="switch" [class.is-on]="behave().resume"><span class="knob"></span></span>
+        </button>
+        <button class="setting-row" (click)="toggleBehave('notify')">
+          <span class="setting-stack">
+            <span>Benachrichtigungen</span>
+            <span class="setting-sub">Bei fertigen Downloads melden</span>
+          </span>
+          <span class="switch" [class.is-on]="behave().notify"><span class="knob"></span></span>
+        </button>
+        <button class="setting-row" (click)="toggleBehave('wifi')">
+          <span class="setting-stack">
+            <span>Nur im WLAN</span>
+            <span class="setting-sub">Downloads nur über WLAN laden</span>
+          </span>
+          <span class="switch" [class.is-on]="behave().wifi"><span class="knob"></span></span>
+        </button>
+      </div>
+    </div>
+  </div>
+}
 } @else {
 <!-- ── Screen 7: Desktop (design/README.md §7) ── -->
 <div class="desktop">
@@ -209,7 +393,7 @@
         <button class="btn-secondary" (click)="toggleMenu('sort-desktop')">
           <i class="fa-solid fa-arrow-down-wide-short"></i> Sortieren
         </button>
-        <button class="btn-accent">
+        <button class="btn-accent" (click)="openAdd()">
           <i class="fa-solid fa-plus"></i> Hinzufügen
         </button>
         @if (menu() === 'sort-desktop') {
@@ -318,6 +502,57 @@
     }
   </aside>
 </div>
+}
+
+<!-- ── Screen 4: Add-Sheet (design/README.md §4) ── -->
+@if (sheet() === 'add') {
+  <div class="sheet-scrim" [class.is-closing]="sheetClosing()" (click)="closeSheet()"></div>
+  <div class="add-sheet" [class.is-closing]="sheetClosing()">
+    <div class="grab-handle"></div>
+    <div class="sheet-head">
+      <button class="sheet-cancel" (click)="closeSheet()">Abbrechen</button>
+      <div class="sheet-title">Torrent hinzufügen</div>
+      <button class="sheet-done" (click)="confirmAdd()">Fertig</button>
+    </div>
+    <div class="sheet-body">
+      <div class="info-card sheet-field">
+        <div class="sheet-label">Magnet-Link</div>
+        <input
+          class="magnet-input"
+          placeholder="magnet:?xt=urn:btih:…"
+          [value]="magnet()"
+          (input)="magnet.set($any($event.target).value)"
+        />
+      </div>
+
+      <div class="group-caption">Kategorie</div>
+      <div class="info-card">
+        @for (c of api.categories(); track c) {
+          <button class="setting-row" (click)="addCat.set(c)">
+            <span>{{ c }}</span>
+            <i class="fa-solid fa-check cat-check" [style.opacity]="addCat() === c ? 1 : 0"></i>
+          </button>
+        }
+        <button class="setting-row" (click)="addCat.set('')">
+          <span>Keine</span>
+          <i class="fa-solid fa-check cat-check" [style.opacity]="addCat() === '' ? 1 : 0"></i>
+        </button>
+      </div>
+
+      <div class="group-caption">Ziel</div>
+      <div class="info-card">
+        <div class="setting-row">
+          <span class="save-path">{{ addSavePath() }}</span>
+        </div>
+        <button class="setting-row" (click)="startNow.set(!startNow())">
+          <span>Sofort starten</span>
+          <span class="switch" [class.is-on]="startNow()"><span class="knob"></span></span>
+        </button>
+      </div>
+
+      <button class="add-confirm" [disabled]="!magnet().trim()" (click)="confirmAdd()">Hinzufügen</button>
+    </div>
+  </div>
 }
 
 <!-- ── Screen 5: Delete-Dialog (design/README.md §5) ── -->

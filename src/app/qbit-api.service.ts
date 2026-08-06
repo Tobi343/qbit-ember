@@ -34,6 +34,7 @@ export interface Torrent {
   addedOn: number;
   tracker: string;
   timeActive: number;
+  magnetUri: string;
 }
 
 export interface ServerState {
@@ -76,6 +77,11 @@ export class QbitApiService {
   readonly torrents = signal<Torrent[]>([]);
   readonly server = signal<ServerState>({ dlSpeed: 0, upSpeed: 0, freeSpace: 0, version: '' });
   readonly categories = signal<string[]>([]);
+  readonly catPaths = signal<Record<string, string>>({});
+  readonly defaultSavePath = signal('');
+  readonly altLimits = signal(false);
+  readonly dlLimit = signal(0);   // bytes/s, 0 = unbegrenzt
+  readonly upLimit = signal(0);
   readonly connected = computed(() => this.auth() === 'ok');
 
   private rid = 0;
@@ -128,10 +134,11 @@ export class QbitApiService {
       this.raw.set(h, { ...(this.raw.get(h) ?? {}), ...(patch as object) });
     }
     if (d.categories || d.full_update) {
-      const cats = new Set(this.categories());
-      for (const c of Object.keys(d.categories ?? {})) cats.add(c);
-      for (const c of d.categories_removed ?? []) cats.delete(c);
-      this.categories.set([...cats].sort());
+      const paths = { ...this.catPaths() };
+      for (const [name, c] of Object.entries(d.categories ?? {})) paths[name] = (c as any).savePath ?? '';
+      for (const c of d.categories_removed ?? []) delete paths[c];
+      this.catPaths.set(paths);
+      this.categories.set(Object.keys(paths).sort());
     }
     if (d.server_state) {
       const s = d.server_state;
@@ -162,7 +169,25 @@ export class QbitApiService {
       addedOn: t.added_on ?? 0,
       tracker: t.tracker ?? '',
       timeActive: t.time_active ?? 0,
+      magnetUri: t.magnet_uri ?? '',
     })));
+  }
+
+  async fetchSettings(): Promise<void> {
+    const get = async (p: string) => {
+      const r = await fetch(`/api/v2/${p}`);
+      return r.ok ? r.text() : '';
+    };
+    this.altLimits.set((await get('transfer/speedLimitsMode')) === '1');
+    this.dlLimit.set(Number(await get('transfer/downloadLimit')) || 0);
+    this.upLimit.set(Number(await get('transfer/uploadLimit')) || 0);
+    this.defaultSavePath.set(await get('app/defaultSavePath'));
+  }
+
+  async toggleAltLimits(): Promise<void> {
+    await this.post('transfer/toggleSpeedLimitsMode', {});
+    this.altLimits.update(v => !v);
+    await this.fetchSettings();
   }
 
   async login(username: string, password: string): Promise<boolean> {
