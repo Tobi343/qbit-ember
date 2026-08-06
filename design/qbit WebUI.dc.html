@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>
+body { margin: 0; background: #E9E9EE; }
+a { color: #C80815; text-decoration: none; }
+a:hover { color: #0051D5; }
+</style>
+</helmet>
+
+<section style="padding:56px 56px 96px; font-family:-apple-system,'SF Pro Text',system-ui,sans-serif; color:#000; -webkit-font-smoothing:antialiased;">
+  <div style="max-width:760px;">
+    <div style="font-size:12px; font-weight:640; letter-spacing:1.2px; text-transform:uppercase; color:#8E8E93;">Runde 1 · qBittorrent WebUI</div>
+    <h1 style="font-size:38px; font-weight:700; letter-spacing:-0.9px; margin:8px 0 0; line-height:1.1;">Ein natives Interface für deinen Seedbox-Server</h1>
+    <p style="font-size:16px; line-height:1.55; color:rgba(60,60,67,0.68); margin:12px 0 0; text-wrap:pretty;">Dieselben zehn Torrents wie in deiner Installation auf 192.168.178.165:8090 — neu gedacht nach den Apple Human Interface Guidelines. <a href="#1a">1a</a> ist klickbar: tippe eine Zeile für die Detailansicht, wische nach links für Pause und Löschen, öffne das Hinzufügen-Sheet über <strong>+</strong>. Werte laufen live mit.</p>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:56px; align-items:flex-start; margin-top:48px; width:1520px;">
+
+    <div id="1a" style="flex:0 0 auto;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <span style="display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:22px; padding:0 7px; border-radius:6px; background:#000; color:#fff; font-size:12px; font-weight:640; letter-spacing:0.3px;">1a</span>
+        <span style="font-size:15px; font-weight:600;">Interaktiver Prototyp — Hell</span>
+      </div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ w }}" height="{{ h }}" hint-size="402px,874px">
+        <dc-import name="qbitPhone" hint-size="402px,874px"></dc-import>
+      </x-import>
+      <div style="width:402px; font-size:13px; line-height:1.5; color:rgba(60,60,67,0.6); margin-top:16px; text-wrap:pretty;">Liste, Detailansicht, Hinzufügen-Sheet und Löschdialog; die Einstellungen liegen hinter dem Zahnrad neben dem Plus, eine Tab-Leiste braucht es nicht. Ringe zeigen den Fortschritt, die Statuszeile darunter passt sich dem Zustand an — Downloads zeigen Tempo und Restzeit, fertige Torrents das Verhältnis.</div>
+    </div>
+
+    <div id="1b" style="flex:0 0 auto;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <span style="display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:22px; padding:0 7px; border-radius:6px; background:#000; color:#fff; font-size:12px; font-weight:640; letter-spacing:0.3px;">1b</span>
+        <span style="font-size:15px; font-weight:600;">Dunkel — Detailansicht</span>
+      </div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" width="{{ w }}" height="{{ h }}" dark="{{ yes }}" hint-size="402px,874px">
+        <dc-import name="qbitPhone" dark="{{ yes }}" initial-screen="detail" hint-size="402px,874px"></dc-import>
+      </x-import>
+      <div style="width:402px; font-size:13px; line-height:1.5; color:rgba(60,60,67,0.6); margin-top:16px; text-wrap:pretty;">Flächen und Karten aus deinem Style Guide (#1C1D22 / #25272D), Akzent in Venetian Red. Auch hier klickbar: über „Torrents“ links oben geht es zurück in die Liste.</div>
+    </div>
+
+    <div id="1c" style="flex:0 0 auto;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <span style="display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:22px; padding:0 7px; border-radius:6px; background:#000; color:#fff; font-size:12px; font-weight:640; letter-spacing:0.3px;">1c</span>
+        <span style="font-size:15px; font-weight:600;">Desktop — Sidebar, Tabelle, Detailspalte</span>
+      </div>
+      <x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ dw }}" height="{{ dh }}" url="192.168.178.165:8090" tabs="{{ tabs }}" hint-size="1520px,860px">
+        <div style="display:flex; height:100%; background:#F2F2F7; font-family:-apple-system,'SF Pro Text',system-ui,sans-serif; color:#000; font-size:13px; -webkit-font-smoothing:antialiased;">
+
+          <div style="width:236px; flex:0 0 236px; background:rgba(246,246,248,0.92); border-right:1px solid rgba(60,60,67,0.14); display:flex; flex-direction:column;">
+            <div style="padding:16px 14px 10px;">
+              <div style="height:30px; border-radius:8px; background:rgba(118,118,128,0.12); display:flex; align-items:center; gap:6px; padding:0 8px;">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="rgba(60,60,67,0.35)" stroke-width="2"><circle cx="7" cy="7" r="4.6"></circle><path d="M10.4 10.4L14 14" stroke-linecap="round"></path></svg>
+                <span style="font-size:13px; color:rgba(60,60,67,0.4);">Filtern</span>
+              </div>
+            </div>
+            <div style="flex:1; overflow:auto; padding:0 8px 12px;">
+              <sc-for list="{{ sidebar }}" as="g" hint-placeholder-count="3">
+                <div style="margin-top:12px;">
+                  <div style="font-size:11px; font-weight:640; letter-spacing:0.6px; text-transform:uppercase; color:rgba(60,60,67,0.45); padding:0 8px 6px;">{{ g.title }}</div>
+                  <sc-for list="{{ g.items }}" as="i" hint-placeholder-count="4">
+                    <div style="{{ i.css }}">
+                      <span style="{{ i.dotCss }}"></span>
+                      <span style="flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ i.label }}</span>
+                      <span style="{{ i.numCss }}">{{ i.n }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border-top:1px solid rgba(60,60,67,0.14); padding:12px 16px; display:flex; gap:16px;">
+              <div>
+                <div style="font-size:10px; font-weight:640; letter-spacing:0.5px; text-transform:uppercase; color:rgba(60,60,67,0.45);">Down</div>
+                <div style="font-size:15px; font-weight:640; color:#007AFF; font-variant-numeric:tabular-nums; margin-top:1px;">84,6 KB/s</div>
+              </div>
+              <div>
+                <div style="font-size:10px; font-weight:640; letter-spacing:0.5px; text-transform:uppercase; color:rgba(60,60,67,0.45);">Up</div>
+                <div style="font-size:15px; font-weight:640; color:#34C759; font-variant-numeric:tabular-nums; margin-top:1px;">512 KB/s</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+            <div style="height:52px; flex:0 0 52px; border-bottom:1px solid rgba(60,60,67,0.14); display:flex; align-items:center; gap:10px; padding:0 16px; background:rgba(255,255,255,0.7);">
+              <span style="font-size:17px; font-weight:640; letter-spacing:-0.3px; white-space:nowrap;">Torrents</span>
+              <span style="font-size:13px; color:rgba(60,60,67,0.5); white-space:nowrap;">10 gesamt · 1 aktiv</span>
+              <div style="flex:1;"></div>
+              <div style="display:flex; gap:6px;">
+                <button style="border:none; border-radius:8px; background:rgba(118,118,128,0.12); color:#C80815; font:inherit; font-size:13px; font-weight:590; padding:7px 12px; cursor:pointer;">Sortieren</button>
+                <button style="border:none; border-radius:8px; background:#C80815; color:#fff; font:inherit; font-size:13px; font-weight:590; padding:7px 14px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                  <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M10 4v12M4 10h12"></path></svg>
+                  <span>Hinzufügen</span>
+                </button>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:minmax(240px,1fr) 84px 132px 100px 96px 96px 76px; gap:12px; padding:9px 16px; font-size:11px; font-weight:640; letter-spacing:0.4px; text-transform:uppercase; color:rgba(60,60,67,0.45); border-bottom:1px solid rgba(60,60,67,0.14);">
+              <span>Name</span><span style="text-align:right;">Größe</span><span>Fortschritt</span><span>Status</span><span style="text-align:right;">Down</span><span style="text-align:right;">Up</span><span style="text-align:right;">Verh.</span>
+            </div>
+
+            <div style="flex:1; overflow:auto;">
+              <sc-for list="{{ rows }}" as="r" hint-placeholder-count="10">
+                <div style="{{ r.css }}">
+                  <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                    <span style="{{ r.dotCss }}"></span>
+                    <div style="min-width:0;">
+                      <div style="font-size:13px; font-weight:560; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ r.title }}</div>
+                      <div style="font-size:11px; color:rgba(60,60,67,0.45); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ r.sub }}</div>
+                    </div>
+                  </div>
+                  <span style="text-align:right; font-variant-numeric:tabular-nums; color:rgba(60,60,67,0.7);">{{ r.size }}</span>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="flex:1; height:5px; border-radius:3px; background:rgba(118,118,128,0.16); overflow:hidden;">
+                      <div style="{{ r.barCss }}"></div>
+                    </div>
+                    <span style="font-size:11px; font-variant-numeric:tabular-nums; color:rgba(60,60,67,0.5); width:42px; flex:0 0 42px; white-space:nowrap; text-align:right;">{{ r.pct }}</span>
+                  </div>
+                  <span style="{{ r.stCss }}">{{ r.status }}</span>
+                  <span style="text-align:right; font-variant-numeric:tabular-nums; color:{{ r.dlColor }};">{{ r.dl }}</span>
+                  <span style="text-align:right; font-variant-numeric:tabular-nums; color:{{ r.upColor }};">{{ r.up }}</span>
+                  <span style="text-align:right; font-variant-numeric:tabular-nums; color:rgba(60,60,67,0.7);">{{ r.ratio }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="width:316px; flex:0 0 316px; border-left:1px solid rgba(60,60,67,0.14); background:rgba(255,255,255,0.75); overflow:auto; padding:18px 18px 24px;">
+            <div style="font-size:15px; font-weight:640; line-height:1.3; letter-spacing:-0.2px; text-wrap:pretty;">THE MUSKETEERS (2014–2016) Komplette Serie</div>
+            <div style="font-size:12px; color:rgba(60,60,67,0.5); margin-top:4px;">1080p · BluRay · x265 · 35,6 GB</div>
+
+            <div style="margin-top:16px; background:#fff; border:1px solid rgba(60,60,67,0.1); border-radius:12px; padding:14px;">
+              <div style="display:flex; align-items:baseline; justify-content:space-between;">
+                <span style="font-size:24px; font-weight:700; color:#007AFF; font-variant-numeric:tabular-nums; letter-spacing:-0.6px;">15,4 %</span>
+                <span style="font-size:12px; color:rgba(60,60,67,0.5); font-variant-numeric:tabular-nums;">5,48 GB von 35,6 GB</span>
+              </div>
+              <div style="margin-top:9px; height:6px; border-radius:3px; background:rgba(118,118,128,0.16); overflow:hidden;">
+                <div style="width:15.4%; height:100%; border-radius:3px; background:#007AFF;"></div>
+              </div>
+              <div style="display:flex; margin-top:14px;">
+                <div style="flex:1;">
+                  <div style="font-size:10px; font-weight:640; letter-spacing:0.4px; text-transform:uppercase; color:rgba(60,60,67,0.45);">Down</div>
+                  <div style="font-size:15px; font-weight:640; color:#007AFF; font-variant-numeric:tabular-nums;">84,6 KB/s</div>
+                </div>
+                <div style="flex:1;">
+                  <div style="font-size:10px; font-weight:640; letter-spacing:0.4px; text-transform:uppercase; color:rgba(60,60,67,0.45);">Up</div>
+                  <div style="font-size:15px; font-weight:640; color:#34C759; font-variant-numeric:tabular-nums;">0 B/s</div>
+                </div>
+                <div style="flex:1;">
+                  <div style="font-size:10px; font-weight:640; letter-spacing:0.4px; text-transform:uppercase; color:rgba(60,60,67,0.45);">Rest</div>
+                  <div style="font-size:15px; font-weight:640; font-variant-numeric:tabular-nums;">4 T 8 Std</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:6px; margin-top:12px;">
+              <button style="flex:1; border:1px solid rgba(60,60,67,0.14); border-radius:9px; background:#fff; color:#C80815; font:inherit; font-size:12px; font-weight:590; padding:8px 0; cursor:pointer;">Pausieren</button>
+              <button style="flex:1; border:1px solid rgba(60,60,67,0.14); border-radius:9px; background:#fff; color:#C80815; font:inherit; font-size:12px; font-weight:590; padding:8px 0; cursor:pointer;">Neu melden</button>
+              <button style="flex:1; border:1px solid rgba(60,60,67,0.14); border-radius:9px; background:#fff; color:#C80815; font:inherit; font-size:12px; font-weight:590; padding:8px 0; cursor:pointer;">Löschen</button>
+            </div>
+
+            <div style="font-size:11px; font-weight:640; letter-spacing:0.5px; text-transform:uppercase; color:rgba(60,60,67,0.45); margin:20px 2px 8px;">Übertragung</div>
+            <div style="background:#fff; border:1px solid rgba(60,60,67,0.1); border-radius:12px; overflow:hidden;">
+              <sc-for list="{{ detailRows }}" as="d" hint-placeholder-count="7">
+                <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding:9px 13px; border-bottom:1px solid rgba(60,60,67,0.08);">
+                  <span style="color:rgba(60,60,67,0.6);">{{ d.k }}</span>
+                  <span style="font-variant-numeric:tabular-nums; font-weight:500; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ d.v }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </x-import>
+      <div style="width:1520px; font-size:13px; line-height:1.5; color:rgba(60,60,67,0.6); margin-top:16px; text-wrap:pretty;">Die Statusleiste links behält die Struktur, die du kennst (Status, Kategorien, Tags, Tracker), verliert aber die doppelten Zähler. Statt des gequetschten Tab-Panels unten sitzt die Detailansicht rechts — sie ist immer sichtbar und muss nicht aufgeklappt werden.</div>
+    </div>
+
+    <div id="1d" style="flex:0 0 auto; width:1520px;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <span style="display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:22px; padding:0 7px; border-radius:6px; background:#000; color:#fff; font-size:12px; font-weight:640; letter-spacing:0.3px;">1d</span>
+        <span style="font-size:15px; font-weight:600;">Designsystem — Übergabe an Claude Code</span>
+      </div>
+
+      <div style="background:#fff; border-radius:20px; padding:32px; display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:36px 48px;">
+
+        <div>
+          <div style="font-size:11px; font-weight:640; letter-spacing:0.8px; text-transform:uppercase; color:rgba(60,60,67,0.45); margin-bottom:14px;">Farben</div>
+          <div style="display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px;">
+            <sc-for list="{{ palette }}" as="p" hint-placeholder-count="8">
+              <div>
+                <div style="{{ p.chipCss }}"></div>
+                <div style="font-size:12px; font-weight:590; margin-top:6px;">{{ p.name }}</div>
+                <div style="font-size:11px; color:rgba(60,60,67,0.45); font-family:ui-monospace,'SF Mono',Menlo,monospace; margin-top:1px;">{{ p.hex }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:11px; font-weight:640; letter-spacing:0.8px; text-transform:uppercase; color:rgba(60,60,67,0.45); margin-bottom:14px;">Typografie · SF Pro / system-ui</div>
+          <sc-for list="{{ type }}" as="t" hint-placeholder-count="6">
+            <div style="display:flex; align-items:baseline; gap:16px; padding:7px 0; border-bottom:1px solid rgba(60,60,67,0.08);">
+              <span style="{{ t.css }}">{{ t.sample }}</span>
+              <div style="flex:1;"></div>
+              <span style="font-size:11px; color:rgba(60,60,67,0.45); font-family:ui-monospace,'SF Mono',Menlo,monospace; white-space:nowrap;">{{ t.spec }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div>
+          <div style="font-size:11px; font-weight:640; letter-spacing:0.8px; text-transform:uppercase; color:rgba(60,60,67,0.45); margin-bottom:14px;">Komponenten</div>
+          <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
+            <button style="border:none; border-radius:14px; background:#C80815; color:#fff; font:inherit; font-size:15px; font-weight:600; padding:12px 22px;">Primär</button>
+            <button style="border:none; border-radius:14px; background:rgba(118,118,128,0.12); color:#C80815; font:inherit; font-size:15px; font-weight:600; padding:12px 22px;">Sekundär</button>
+            <button style="border:none; border-radius:14px; background:rgba(255,59,48,0.1); color:#C80815; font:inherit; font-size:15px; font-weight:600; padding:12px 22px;">Destruktiv</button>
+            <span style="width:51px; height:31px; border-radius:16px; background:#34C759; padding:2px; display:flex; justify-content:flex-end; align-items:center;"><span style="width:27px; height:27px; border-radius:14px; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.18);"></span></span>
+            <span style="width:51px; height:31px; border-radius:16px; background:rgba(118,118,128,0.16); padding:2px; display:flex; align-items:center;"><span style="width:27px; height:27px; border-radius:14px; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.18);"></span></span>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;">
+            <sc-for list="{{ states }}" as="s" hint-placeholder-count="6">
+              <div style="display:flex; align-items:center; gap:7px; border:1px solid rgba(60,60,67,0.12); border-radius:16px; padding:6px 12px 6px 8px;">
+                <svg width="20" height="20" viewBox="0 0 34 34" style="flex:0 0 20px;">
+                  <circle cx="17" cy="17" r="14" fill="none" stroke="rgba(118,118,128,0.16)" stroke-width="4"></circle>
+                  <circle cx="17" cy="17" r="14" fill="none" stroke="{{ s.color }}" stroke-width="4" stroke-linecap="round" stroke-dasharray="{{ s.dash }}" transform="rotate(-90 17 17)"></circle>
+                </svg>
+                <span style="{{ s.css }}">{{ s.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:16px; display:flex; gap:8px;">
+            <sc-for list="{{ chipDemo }}" as="c" hint-placeholder-count="3">
+              <span style="{{ c.css }}">{{ c.label }}</span>
+            </sc-for>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:11px; font-weight:640; letter-spacing:0.8px; text-transform:uppercase; color:rgba(60,60,67,0.45); margin-bottom:14px;">Regeln &amp; Schnittstelle</div>
+          <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11.5px; line-height:1.75; background:#F2F2F7; border-radius:12px; padding:16px; color:#1C1C1E; white-space:pre-wrap;">{{ code }}</div>
+          <ul style="font-size:13px; line-height:1.6; color:rgba(60,60,67,0.68); padding-left:18px; margin:14px 0 0;">
+            <li>Radien: 18 px Karten · 14 px Buttons · 10 px Felder · 16 px Chips</li>
+            <li>Abstände: 4 / 8 / 12 / 16 / 20 / 26 px, Seitenrand 20 px</li>
+            <li>Trennlinien nur zwischen Zeilen, nie am Kartenrand</li>
+            <li>Ziffern immer <code style="font-family:ui-monospace,monospace;">tabular-nums</code>, deutsche Dezimalkommas</li>
+            <li>Tap-Ziele mindestens 44 px hoch</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const G = 1024 * 1024 * 1024;
+
+const ROWS = [
+  ['THE MUSKETEERS (2014–2016) Komplette Serie', '1080p · BluRay · x265 · tv-sonarr', 35.56, 0.154, 'Lädt', '#007AFF', '84,6 KB/s', '0 B/s', '0,00'],
+  ['Friends (1994) S01 · 1080p BluRay REMUX', '1080p · REMUX · DTS-HD · tv-sonarr', 6.05, 1, 'Verteilt', '#34C759', '0 B/s', '473,2 KB/s', '0,00'],
+  ['Edge of Tomorrow (2014) 1080p NF WEB-DL', '1080p · WEB-DL · DDP5.1 · radarr', 2.63, 1, 'Verteilt', '#34C759', '0 B/s', '38,4 KB/s', '0,00'],
+  ['Scary Movie 4 (2006) 1080p AMZN WEB-DL', '1080p · AMZN · x264 · radarr', 5.24, 1, 'Stockt', '#FF9F0A', '0 B/s', '0 B/s', '0,00'],
+  ['Fate/stay night: Unlimited Blade Works', '1080p · BluRay · FLAC · tv-sonarr', 7.54, 1, 'Fertig', '#34C759', '0 B/s', '0 B/s', '0,55'],
+  ['Demon Slayer: Kimetsu no Yaiba', '1080p · BluRay · x265 · radarr', 8.0, 1, 'Fertig', '#34C759', '0 B/s', '0 B/s', '2,73'],
+  ['[One Pace][1-7] Romance Dawn', '1080p · WEB · AAC · tv-sonarr', 1.65, 1, 'Fertig', '#34C759', '0 B/s', '0 B/s', '0,11'],
+  ['Mortal Kombat II (2026) 1080p AMZN WEB-DL', '1080p · AMZN · DDP5.1 · radarr', 2.34, 1, 'Wartet', '#8E8E93', '0 B/s', '0 B/s', '0,45'],
+  ["Hitman's Wife's Bodyguard (2021) EXTENDED", '1080p · BluRay · x264 · radarr', 6.94, 1, 'Wartet', '#8E8E93', '0 B/s', '0 B/s', '0,05'],
+  ['Avatar: Aang – The Last Airbender (2024)', '2160p · NF · WEB-DL · radarr', 16.11, 1, 'Wartet', '#8E8E93', '0 B/s', '0 B/s', '0,00']
+];
+
+const CIRC = 2 * Math.PI * 14;
+
+class Component extends DCLogic {
+  renderVals() {
+    const rows = ROWS.map((r, i) => {
+      const [title, sub, size, prog, status, color, dl, up, ratio] = r;
+      return {
+        title, sub, status, dl, up, ratio,
+        size: size.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' GB',
+        pct: Math.round(prog * 100) + ' %',
+        dlColor: dl === '0 B/s' ? 'rgba(60,60,67,0.35)' : '#007AFF',
+        upColor: up === '0 B/s' ? 'rgba(60,60,67,0.35)' : '#34C759',
+        barCss: 'height:100%; border-radius:3px; background:' + color + '; width:' + (prog * 100) + '%;',
+        dotCss: 'width:8px; height:8px; border-radius:5px; flex:0 0 auto; background:' + color + ';',
+        stCss: 'font-weight:560; color:' + color + ';',
+        css: 'display:grid; grid-template-columns:minmax(240px,1fr) 84px 132px 100px 96px 96px 76px; gap:12px; align-items:center; padding:9px 16px; border-bottom:1px solid rgba(60,60,67,0.08); background:' +
+          (i === 0 ? 'rgba(0,122,255,0.07)' : 'transparent') + ';'
+      };
+    });
+
+    const item = (label, n, color) => ({
+      label, n,
+      css: 'display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:7px; font-size:13px; background:' + (label === 'Alle' && !color ? 'transparent' : 'transparent') + ';',
+      dotCss: 'width:7px; height:7px; border-radius:4px; flex:0 0 auto; background:' + (color || 'rgba(60,60,67,0.25)') + ';',
+      numCss: 'font-size:12px; font-variant-numeric:tabular-nums; color:rgba(60,60,67,0.4);'
+    });
+
+    return {
+      w: 402, h: 874, dw: 1520, dh: 860, yes: true,
+      tabs: [{ title: 'qBittorrent' }, { title: 'Sonarr' }, { title: 'Radarr' }],
+      rows,
+      sidebar: [
+        { title: 'Status', items: [item('Alle', 10), item('Lädt', 1, '#007AFF'), item('Verteilt', 3, '#34C759'), item('Fertig', 6, '#34C759'), item('Wartet', 3, '#8E8E93'), item('Stockt', 1, '#FF9F0A'), item('Fehler', 0, '#C80815')] },
+        { title: 'Kategorien', items: [item('radarr', 6), item('tv-sonarr', 3), item('prowlarr', 0), item('Ohne Kategorie', 1)] },
+        { title: 'Tags', items: [item('Ohne Tag', 10)] }
+      ],
+      detailRows: [
+        ['Verhältnis', '0,00'], ['Seeds', '1 (12)'], ['Peers', '0 (5)'], ['Verbunden seit', '2 Std 14 Min'],
+        ['Kategorie', 'tv-sonarr'], ['Speicherpfad', '/downloads/tv'], ['Hinzugefügt', '05.08.2026, 09:29'],
+        ['Tracker', 'exodus.desync.com']
+      ].map(([k, v]) => ({ k, v })),
+      palette: [
+        ['Akzent', '#C80815'], ['Download', '#007AFF'], ['Erfolg', '#34C759'], ['Warnung', '#FF9F0A'],
+        ['Fläche hell', '#F2F2F7'], ['Karte hell', '#FFFFFF'], ['Fläche dunkel', '#1C1D22'], ['Karte dunkel', '#25272D']
+      ].map(([name, hex]) => ({
+        name, hex,
+        chipCss: 'height:52px; border-radius:11px; background:' + hex + '; border:1px solid rgba(60,60,67,0.1);'
+      })),
+      type: [
+        ['Torrents', 'Large Title · 34 / 700', 'font-size:30px; font-weight:700; letter-spacing:-0.7px;'],
+        ['Detailtitel', 'Title 3 · 19 / 640', 'font-size:19px; font-weight:640; letter-spacing:-0.3px;'],
+        ['Listenzeile', 'Body · 16 / 400', 'font-size:16px;'],
+        ['Zeilentitel', 'Callout · 15 / 590', 'font-size:15px; font-weight:590;'],
+        ['84,6 KB/s', 'Numerik · 17 / 640 tabular', 'font-size:17px; font-weight:640; font-variant-numeric:tabular-nums; color:#007AFF;'],
+        ['Sekundär, Meta', 'Footnote · 13 / 500', 'font-size:13px; font-weight:500; color:rgba(60,60,67,0.6);'],
+        ['ABSCHNITT', 'Caption · 11 / 640 · +0.5', 'font-size:11px; font-weight:640; letter-spacing:0.5px; color:rgba(60,60,67,0.45);']
+      ].map(([sample, spec, css]) => ({ sample, spec, css })),
+      states: [
+        ['Lädt', '#007AFF', 0.15], ['Verteilt', '#34C759', 1], ['Fertig', '#34C759', 1],
+        ['Wartet', '#8E8E93', 1], ['Stockt', '#FF9F0A', 0.62], ['Fehler', '#C80815', 0.4]
+      ].map(([label, color, p]) => ({
+        label, color, dash: (CIRC * p).toFixed(1) + ' ' + CIRC.toFixed(1),
+        css: 'font-size:13px; font-weight:590; color:' + color + ';'
+      })),
+      chipDemo: [['Alle', true], ['Aktiv', false], ['Fertig', false]].map(([label, on]) => ({
+        label,
+        css: 'font-size:13.5px; font-weight:590; padding:7px 14px; border-radius:16px; background:' +
+          (on ? '#C80815' : 'rgba(118,118,128,0.12)') + '; color:' + (on ? '#fff' : '#000') + ';'
+      })),
+      code: '/* Tokens — hell */\n--bg:#F2F2F7;  --card:#FFFFFF;\n--sep:rgba(60,60,67,0.16);\n--text:#000;   --text-2:rgba(60,60,67,0.60);\n--accent:#C80815; --download:#007AFF;\n\n/* Tokens — dunkel */\n--bg:#1C1D22;  --card:#25272D;\n--sep:rgba(255,255,255,0.06);\n--elevated:#2D3038;\n--text:#F5F5F7; --text-2:rgba(245,245,247,0.72);\n--accent:#E0202C; --download:#0A84FF;\n\n/* WebUI-API, Polling 1,1 s */\nGET  /api/v2/torrents/info?filter=all\nGET  /api/v2/sync/maindata?rid=<n>\nGET  /api/v2/transfer/info\nPOST /api/v2/torrents/pause   {hashes}\nPOST /api/v2/torrents/delete  {hashes, deleteFiles}\nPOST /api/v2/torrents/add     {urls, category, savepath}'
+    };
+  }
+}
+</script>
+</body>
+</html>

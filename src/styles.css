@@ -1,0 +1,104 @@
+/* ── Design tokens — from design/README.md + design/uploads/STYLE_GUIDE.md §3.
+   Light is the default, dark overrides. Never hard-code hex values in components. */
+
+@font-face {
+  font-family: 'WildBreath';
+  src: url('/fonts/WildBreath.ttf') format('truetype');
+  font-display: swap;
+}
+
+:root {
+  /* App tokens (design/README.md — light) */
+  --bg: #F2F2F7;
+  --c1: #FFFFFF;
+  --sep: rgba(60, 60, 67, 0.16);
+  --t1: #000000;
+  --t2: rgba(60, 60, 67, 0.60);
+  --t3: rgba(60, 60, 67, 0.32);
+  --fill: rgba(118, 118, 128, 0.12);
+  --nav: rgba(249, 249, 249, 0.80);
+  --ac: #C80815;
+  --dl: #007AFF;
+  --ok: #34C759;
+  --warn: #FF9F0A;
+  --bad: #C80815;
+
+  /* Style guide extras */
+  --on-accent: #ffffff;
+  --font: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-display: 'WildBreath', 'Outfit', system-ui, sans-serif;
+
+  /* Motion (design/README.md motion table) */
+  --push-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-fast: 140ms;
+  --dur-base: 240ms;
+
+  /* Per-theme extras */
+  --sidebar-bg: rgba(246, 246, 248, 0.92);
+  --detail-col-bg: rgba(255, 255, 255, 0.75);
+  --menu-shadow: 0 12px 32px rgba(0, 0, 0, 0.18), 0 0 0 0.5px var(--sep);
+  --seg-active-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  --pill-bg: var(--fill);
+  --pill-fg: var(--ac);
+  --pill-open-bg: #FFFFFF;
+  --pill-open-fg: var(--ac);
+  --pill-open-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
+}
+
+[data-theme='dark'] {
+  --bg: #1C1D22;
+  --c1: #25272D;
+  --sep: rgba(255, 255, 255, 0.06);
+  --t1: #F5F5F7;
+  --t2: rgba(245, 245, 247, 0.72);
+  --t3: rgba(245, 245, 247, 0.48);
+  --fill: #2D3038;
+  --nav: rgba(37, 39, 45, 0.88);
+  --ac: #E0202C;
+  --dl: #0A84FF;
+  --ok: #3DC960;
+  --warn: #E8A033;
+  --bad: #E0202C;
+
+  --sidebar-bg: rgba(30, 31, 37, 0.92);
+  --detail-col-bg: rgba(37, 39, 45, 0.75);
+  --menu-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), 0 0 0 0.5px var(--sep);
+  --seg-active-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --pill-bg: var(--ac);
+  --pill-fg: #FFFFFF;
+  --pill-open-bg: var(--ac);
+  --pill-open-fg: #FFFFFF;
+  --pill-open-shadow: 0 4px 14px rgba(224, 32, 44, 0.35);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--t1);
+  font-family: -apple-system, var(--font);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font-family: inherit;
+  border: 0;
+  background: none;
+  color: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+
+input {
+  font-family: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}

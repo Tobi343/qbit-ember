@@ -1,0 +1,367 @@
+@if (!isDesktop()) {
+<!-- ── Screen 1: Torrent-Liste, Phone (design/README.md §1) ── -->
+<div class="screen list-screen">
+  <header class="list-head">
+    <div class="head-row">
+      <div>
+        <div class="eyebrow">{{ host }}</div>
+        <h1>Torrents</h1>
+      </div>
+      <div class="head-actions">
+        <button class="circle circle--gear" aria-label="Einstellungen">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+        <button class="circle circle--add" aria-label="Torrent hinzufügen">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="search">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input
+        type="search"
+        placeholder="Torrents durchsuchen"
+        [value]="q()"
+        (input)="q.set($any($event.target).value)"
+      />
+    </div>
+
+    <div class="speed-card">
+      <div class="speed-col">
+        <div class="speed-label">Download</div>
+        <div class="speed-value" style="color: var(--dl)">
+          <i class="fa-solid fa-arrow-down"></i> {{ fmtSpeed(api.server().dlSpeed) }}
+        </div>
+      </div>
+      <div class="speed-col">
+        <div class="speed-label">Upload</div>
+        <div class="speed-value" style="color: var(--ok)">
+          <i class="fa-solid fa-arrow-up"></i> {{ fmtSpeed(api.server().upSpeed) }}
+        </div>
+      </div>
+      <div class="speed-col">
+        <div class="speed-label">Frei</div>
+        <div class="speed-value">{{ fmtBytes(api.server().freeSpace) }}</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="control-row">
+    <button class="pill" [class.is-open]="menu() === 'filter'" (click)="toggleMenu('filter')">
+      <i class="fa-solid fa-filter"></i>
+      {{ FILTER_LABEL[filter()] }}
+      <span class="pill-count">{{ counts()[filter()] }}</span>
+      <i class="fa-solid fa-chevron-down chev"></i>
+    </button>
+    <button class="pill" [class.is-open]="menu() === 'sort'" (click)="toggleMenu('sort')">
+      <i class="fa-solid fa-arrow-down-wide-short"></i>
+      {{ SORT_LABEL[sort()] }}
+      <i class="fa-solid fa-chevron-down chev"></i>
+    </button>
+    <button class="dir-btn" [class.is-asc]="dir() === -1" (click)="flipDir()" aria-label="Sortierrichtung">
+      <i class="fa-solid fa-arrow-down"></i>
+    </button>
+    <div class="result-count">{{ visible().length }} Torrents</div>
+  </div>
+
+  @if (menu() === 'filter' || menu() === 'sort') {
+    <div class="menu-backdrop" (click)="menu.set(null)"></div>
+    <div class="menu" [class.menu--sort]="menu() === 'sort'">
+      @if (menu() === 'filter') {
+        @for (f of filters; track f) {
+          <button class="menu-item" (click)="pickFilter(f)">
+            <i class="fa-solid fa-check" [style.opacity]="filter() === f ? 1 : 0"></i>
+            <span>{{ FILTER_LABEL[f] }}</span>
+            <span class="menu-count">{{ counts()[f] }}</span>
+          </button>
+        }
+      } @else {
+        @for (s of sorts; track s) {
+          <button class="menu-item" (click)="pickSort(s)">
+            <i class="fa-solid fa-check" [style.opacity]="sort() === s ? 1 : 0"></i>
+            <span>{{ SORT_LABEL[s] }}</span>
+          </button>
+        }
+      }
+    </div>
+  }
+
+  <main class="list-content">
+    @if (visible().length === 0) {
+      <div class="list-group">
+        <div class="empty">
+          <div class="empty-title">Keine Treffer</div>
+          <div class="empty-sub">Passe Suche oder Filter an.</div>
+        </div>
+      </div>
+    } @else {
+      <div class="list-group">
+        @for (t of visible(); track t.hash) {
+          <div class="row-wrap">
+            <div class="swipe-actions">
+              <button class="swipe-btn swipe-btn--pause" (click)="togglePause(t)">
+                <i class="fa-solid" [class]="t.state === 'paused' ? 'fa-play' : 'fa-pause'"></i>
+                <span>{{ t.state === 'paused' ? 'Start' : 'Pause' }}</span>
+              </button>
+              <button class="swipe-btn swipe-btn--delete" (click)="askDelete(t)">
+                <i class="fa-solid fa-trash"></i>
+                <span>Löschen</span>
+              </button>
+            </div>
+            <div
+              class="row"
+              [class.is-dragging]="dragging() === t.hash"
+              [style.transform]="'translateX(' + rowOffset(t) + 'px)'"
+              (pointerdown)="onPointerDown($event, t)"
+              (pointermove)="onPointerMove($event, t)"
+              (pointerup)="onPointerUp(t)"
+              (pointercancel)="onPointerUp(t)"
+            >
+              <svg class="ring" viewBox="0 0 34 34" width="34" height="34">
+                <circle cx="17" cy="17" r="14" fill="none" stroke="var(--fill)" stroke-width="3" />
+                <circle
+                  cx="17" cy="17" r="14" fill="none"
+                  [attr.stroke]="'var(' + STATE_COLOR[t.state] + ')'"
+                  stroke-width="3" stroke-linecap="round"
+                  [attr.stroke-dasharray]="RING_C * t.progress + ' ' + RING_C"
+                  transform="rotate(-90 17 17)"
+                  class="ring-arc"
+                />
+              </svg>
+              <div class="row-text">
+                <div class="row-title">{{ t.name }}</div>
+                <div class="row-tech">{{ techLine(t) }}</div>
+                <div class="row-status">
+                  <span [style.color]="'var(' + STATE_COLOR[t.state] + ')'">{{ STATE_LABEL[t.state] }}</span>
+                  <span class="row-status-detail"> · {{ statusDetail(t) }}</span>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right row-chev"></i>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </main>
+</div>
+} @else {
+<!-- ── Screen 7: Desktop (design/README.md §7) ── -->
+<div class="desktop">
+  <aside class="sidebar">
+    <div class="sidebar-search">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input
+        placeholder="Filtern"
+        [value]="q()"
+        (input)="q.set($any($event.target).value)"
+      />
+    </div>
+    <div class="sidebar-scroll">
+      <div class="side-caption">Status</div>
+      @for (f of sideFilters; track f) {
+        <button class="side-item" [class.is-active]="sideFilter() === f" (click)="pickSideFilter(f)">
+          <span class="dot" [style.background]="'var(' + FILTER_DOT[f] + ')'"></span>
+          <span class="side-label">{{ FILTER_LABEL[f] }}</span>
+          <span class="side-count">{{ counts()[f] }}</span>
+        </button>
+      }
+      <div class="side-caption">Kategorien</div>
+      @for (c of catCounts().cats; track c[0]) {
+        <button class="side-item" [class.is-active]="catFilter() === c[0]" (click)="pickCat(c[0])">
+          <span class="dot" style="background: var(--t3)"></span>
+          <span class="side-label">{{ c[0] }}</span>
+          <span class="side-count">{{ c[1] }}</span>
+        </button>
+      }
+      <button class="side-item" [class.is-active]="catFilter() === NO_CAT" (click)="pickCat(NO_CAT)">
+        <span class="dot" style="background: var(--t3)"></span>
+        <span class="side-label">Ohne Kategorie</span>
+        <span class="side-count">{{ catCounts().none }}</span>
+      </button>
+      <div class="side-caption">Tags</div>
+      <button class="side-item" [class.is-active]="tagFilter() === NO_TAG" (click)="pickTag(NO_TAG)">
+        <span class="dot" style="background: var(--t3)"></span>
+        <span class="side-label">Ohne Tag</span>
+        <span class="side-count">{{ tagCounts().none }}</span>
+      </button>
+      @for (tg of tagCounts().tags; track tg[0]) {
+        <button class="side-item" [class.is-active]="tagFilter() === tg[0]" (click)="pickTag(tg[0])">
+          <span class="dot" style="background: var(--t3)"></span>
+          <span class="side-label">{{ tg[0] }}</span>
+          <span class="side-count">{{ tg[1] }}</span>
+        </button>
+      }
+    </div>
+    <footer class="sidebar-foot">
+      <span style="color: var(--dl)"><i class="fa-solid fa-arrow-down"></i> {{ fmtSpeed(api.server().dlSpeed) }}</span>
+      <span style="color: var(--ok)"><i class="fa-solid fa-arrow-up"></i> {{ fmtSpeed(api.server().upSpeed) }}</span>
+    </footer>
+  </aside>
+
+  <section class="centre">
+    <div class="toolbar">
+      <div class="toolbar-title">
+        <span class="toolbar-h">Torrents</span>
+        <span class="toolbar-sub">{{ counts()['all'] }} gesamt · {{ counts()['active'] }} aktiv</span>
+      </div>
+      <div class="toolbar-actions">
+        <button class="btn-secondary" (click)="toggleMenu('sort-desktop')">
+          <i class="fa-solid fa-arrow-down-wide-short"></i> Sortieren
+        </button>
+        <button class="btn-accent">
+          <i class="fa-solid fa-plus"></i> Hinzufügen
+        </button>
+        @if (menu() === 'sort-desktop') {
+          <div class="menu-backdrop" (click)="menu.set(null)"></div>
+          <div class="menu menu--toolbar">
+            @for (s of sorts; track s) {
+              <button class="menu-item" (click)="pickSort(s)">
+                <i class="fa-solid fa-check" [style.opacity]="sort() === s ? 1 : 0"></i>
+                <span>{{ SORT_LABEL[s] }}</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="table-head">
+      <span>Name</span><span>Größe</span><span>Fortschritt</span><span>Status</span>
+      <span>Down</span><span>Up</span><span>Verhältnis</span>
+    </div>
+    <div class="table-scroll">
+      @for (t of visible(); track t.hash) {
+        <button class="trow" [class.is-selected]="selected()?.hash === t.hash" (click)="sel.set(t.hash)">
+          <span class="tcell tcell-name">
+            <span class="dot" [style.background]="'var(' + STATE_COLOR[t.state] + ')'"></span>
+            <span class="tname-stack">
+              <span class="tname">{{ t.name }}</span>
+              <span class="tsub">{{ techLine(t) }}</span>
+            </span>
+          </span>
+          <span class="tcell">{{ fmtBytes(t.size) }}</span>
+          <span class="tcell tcell-prog">
+            <span class="tbar"><span class="tbar-fill" [style.width.%]="t.progress * 100" [style.background]="'var(' + STATE_COLOR[t.state] + ')'"></span></span>
+            <span class="tpct">{{ pct(t) }}</span>
+          </span>
+          <span class="tcell tcell-state" [style.color]="'var(' + STATE_COLOR[t.state] + ')'">{{ STATE_LABEL[t.state] }}</span>
+          <span class="tcell">{{ t.dlspeed ? fmtSpeed(t.dlspeed) : '–' }}</span>
+          <span class="tcell">{{ t.upspeed ? fmtSpeed(t.upspeed) : '–' }}</span>
+          <span class="tcell">{{ fmtRatio(t.ratio) }}</span>
+        </button>
+      }
+      @if (visible().length === 0) {
+        <div class="empty">
+          <div class="empty-title">Keine Treffer</div>
+          <div class="empty-sub">Passe Suche oder Filter an.</div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <aside class="detail-col">
+    @if (selected(); as t) {
+      <div class="dc-title">{{ t.name }}</div>
+      <div class="dc-tech">{{ techLine(t) }}</div>
+
+      <div class="dc-card">
+        <div class="dc-pct-row">
+          <span class="dc-pct" [style.color]="'var(' + STATE_COLOR[t.state] + ')'">{{ pct(t) }}</span>
+          <span class="dc-of">{{ fmtBytes(t.completed) }} von {{ fmtBytes(t.size) }}</span>
+        </div>
+        <div class="dc-bar"><div class="dc-bar-fill" [style.width.%]="t.progress * 100" [style.background]="'var(' + STATE_COLOR[t.state] + ')'"></div></div>
+        <div class="dc-stats">
+          <div>
+            <div class="dc-label">Down</div>
+            <div class="dc-value" style="color: var(--dl)">{{ fmtSpeed(t.dlspeed) }}</div>
+          </div>
+          <div>
+            <div class="dc-label">Up</div>
+            <div class="dc-value" style="color: var(--ok)">{{ fmtSpeed(t.upspeed) }}</div>
+          </div>
+          <div>
+            <div class="dc-label">Rest</div>
+            <div class="dc-value">{{ fmtBytes(t.size - t.completed) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dc-actions">
+        <button class="dc-btn" (click)="togglePause(t)">
+          <i class="fa-solid" [class]="t.state === 'paused' ? 'fa-play' : 'fa-pause'"></i>
+          {{ t.state === 'paused' ? 'Starten' : 'Pausieren' }}
+        </button>
+        <button class="dc-btn" (click)="reannounce(t)">
+          <i class="fa-solid fa-tower-broadcast"></i> Neu melden
+        </button>
+        <button class="dc-btn dc-btn--bad" (click)="askDelete(t)">
+          <i class="fa-solid fa-trash"></i> Löschen
+        </button>
+      </div>
+
+      <div class="dc-caption">Übertragung</div>
+      <div class="dc-card dc-info">
+        <div class="dc-row"><span>Verhältnis</span><span>{{ fmtRatio(t.ratio) }}</span></div>
+        <div class="dc-row"><span>Seeds</span><span>{{ t.seeds }}</span></div>
+        <div class="dc-row"><span>Peers</span><span>{{ t.peers }}</span></div>
+        <div class="dc-row"><span>Verbunden seit</span><span>{{ fmtEta(t.timeActive) }}</span></div>
+        <div class="dc-row"><span>Kategorie</span><span>{{ t.category || '–' }}</span></div>
+        <div class="dc-row"><span>Speicherpfad</span><span class="dc-path">{{ t.savePath }}</span></div>
+        <div class="dc-row"><span>Hinzugefügt</span><span>{{ fmtDate(t.addedOn) }}</span></div>
+        <div class="dc-row"><span>Tracker</span><span>{{ trackerHost(t) }}</span></div>
+      </div>
+    } @else {
+      <div class="empty">
+        <div class="empty-title">Kein Torrent ausgewählt</div>
+      </div>
+    }
+  </aside>
+</div>
+}
+
+<!-- ── Screen 5: Delete-Dialog (design/README.md §5) ── -->
+@if (sheet() === 'del' && delTarget(); as t) {
+  <div class="del-scrim" (click)="sheet.set(null)"></div>
+  <div class="del-stack">
+    <div class="del-card">
+      <div class="del-head">
+        <div class="del-title">Torrent entfernen?</div>
+        <div class="del-name">{{ t.name }}</div>
+      </div>
+      <button class="del-switch-row" (click)="delFiles.set(!delFiles())">
+        <span>Dateien auch löschen</span>
+        <span class="switch" [class.is-on]="delFiles()"><span class="knob"></span></span>
+      </button>
+      <button class="del-confirm" (click)="confirmDelete()">Entfernen</button>
+    </div>
+    <button class="del-cancel" (click)="sheet.set(null)">Abbrechen</button>
+  </div>
+}
+
+<!-- ── Login (nicht im Design — minimal, gleiche Tokens) ── -->
+@if (api.auth() === 'login') {
+  <div class="login-scrim">
+    <form class="login-card" (submit)="submitLogin(); $event.preventDefault()">
+      <div class="login-title">Anmelden</div>
+      <div class="login-sub">{{ host }}</div>
+      <input
+        class="login-field" placeholder="Benutzername" autocomplete="username"
+        [value]="loginUser()" (input)="loginUser.set($any($event.target).value)"
+      />
+      <input
+        class="login-field" type="password" placeholder="Passwort" autocomplete="current-password"
+        [value]="loginPass()" (input)="loginPass.set($any($event.target).value)"
+      />
+      @if (api.loginError()) {
+        <div class="login-error">{{ api.loginError() }}</div>
+      }
+      <button class="login-btn" type="submit">Anmelden</button>
+    </form>
+  </div>
+}
+
+<!-- ── Toast (design/README.md §6) ── -->
+@if (toastMsg()) {
+  <div class="toast">{{ toastMsg() }}</div>
+}

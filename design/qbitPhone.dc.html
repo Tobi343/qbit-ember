@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+@font-face { font-family: 'WildBreath'; src: url('uploads/WildBreath.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@keyframes qbPush { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes qbSheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes qbFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes qbToast { 0% { opacity: 0; transform: translate(-50%, 8px); } 12% { opacity: 1; transform: translate(-50%, 0); } 88% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, 8px); } }
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="--bg:#F2F2F7;--c1:#FFFFFF;--sep:rgba(60,60,67,0.16);--t1:#000000;--t2:rgba(60,60,67,0.60);--t3:rgba(60,60,67,0.32);--fill:rgba(118,118,128,0.12);--nav:rgba(249,249,249,0.80);--ac:#C80815;--dl:#007AFF;--ok:#34C759;--warn:#FF9F0A;--bad:#C80815; position:relative; height:874px; width:100%; overflow:hidden; background:var(--bg,#F2F2F7); color:var(--t1,#000); font-family:-apple-system,'SF Pro Text',system-ui,sans-serif; -webkit-font-smoothing:antialiased; letter-spacing:-0.01em;">
+
+  <div style="position:absolute; inset:0; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch;">
+
+    <sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+    <div>
+      <div style="padding:64px 20px 0;">
+        <div style="display:flex; align-items:flex-end; gap:12px;">
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:13px; font-weight:590; color:var(--t2,rgba(60,60,67,0.6)); letter-spacing:0.01em;">192.168.178.165:8090</div>
+            <div style="font-family:'WildBreath','Outfit',system-ui,sans-serif; font-size:46px; font-weight:400; letter-spacing:0.015em; line-height:1.0; margin-top:2px;">Torrents</div>
+          </div>
+          <div style="display:flex; gap:8px; padding-bottom:4px;">
+            <button onClick="{{ openSettings }}" style="width:36px; height:36px; border:none; border-radius:18px; background:var(--fill,rgba(118,118,128,0.12)); color:var(--ac,#C80815); display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0;">
+              <svg width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 16.2a3.2 3.2 0 100-6.4 3.2 3.2 0 000 6.4zM20.6 15.6a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-2.7 1.1v.3a2 2 0 11-4 0v-.2a1.6 1.6 0 00-2.8-1.1l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00-1.1-2.7h-.3a2 2 0 110-4h.2a1.6 1.6 0 001.1-2.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3h.1a1.6 1.6 0 001-1.5v-.3a2 2 0 114 0v.2a1.6 1.6 0 002.7 1.1l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8v.1a1.6 1.6 0 001.5 1h.3a2 2 0 110 4h-.2a1.6 1.6 0 00-1.5 1z"></path></svg>
+            </button>
+            <button onClick="{{ openAdd }}" style="width:36px; height:36px; border:none; border-radius:18px; background:var(--ac,#C80815); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; box-shadow:0 2px 8px rgba(0,122,255,0.32);">
+              <svg width="19" height="19" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 4v12M4 10h12"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-top:14px; height:36px; border-radius:10px; background:var(--fill,rgba(118,118,128,0.12)); display:flex; align-items:center; gap:6px; padding:0 9px;">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" style="color:var(--t3,rgba(60,60,67,0.32)); flex:0 0 auto;"><circle cx="7" cy="7" r="4.6"></circle><path d="M10.4 10.4L14 14" stroke-linecap="round"></path></svg>
+          <input value="{{ q }}" onChange="{{ onQuery }}" placeholder="Torrents durchsuchen" style="flex:1; min-width:0; border:none; outline:none; background:transparent; font:inherit; font-size:16px; color:var(--t1,#000); padding:0;" />
+        </div>
+
+        <div style="margin-top:12px; background:var(--c1,#fff); border-radius:16px; padding:13px 4px; display:flex; align-items:center;">
+          <div style="flex:1; min-width:0; padding:0 12px; white-space:nowrap;">
+            <div style="font-size:11px; font-weight:590; color:var(--t2,rgba(60,60,67,0.6)); text-transform:uppercase; letter-spacing:0.4px;">Download</div>
+            <div style="display:flex; align-items:center; gap:5px; color:var(--dl,#007AFF); margin-top:2px;">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;"><path d="M6 1.5v9M2.5 7L6 10.5 9.5 7"></path></svg>
+              <span style="font-size:18px; font-weight:640; font-variant-numeric:tabular-nums; letter-spacing:-0.4px;">{{ totalDown }}</span>
+            </div>
+          </div>
+          <div style="flex:1; min-width:0; padding:0 12px; white-space:nowrap; border-left:1px solid var(--sep,rgba(60,60,67,0.16));">
+            <div style="font-size:11px; font-weight:590; color:var(--t2,rgba(60,60,67,0.6)); text-transform:uppercase; letter-spacing:0.4px;">Upload</div>
+            <div style="display:flex; align-items:center; gap:5px; color:var(--ok,#34C759); margin-top:2px;">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;"><path d="M6 10.5v-9M2.5 5L6 1.5 9.5 5"></path></svg>
+              <span style="font-size:18px; font-weight:640; font-variant-numeric:tabular-nums; letter-spacing:-0.4px;">{{ totalUp }}</span>
+            </div>
+          </div>
+          <div style="flex:0 0 auto; padding:0 12px; white-space:nowrap; border-left:1px solid var(--sep,rgba(60,60,67,0.16));">
+            <div style="font-size:11px; font-weight:590; color:var(--t2,rgba(60,60,67,0.6)); text-transform:uppercase; letter-spacing:0.4px;">Frei</div>
+            <div style="font-size:18px; font-weight:640; font-variant-numeric:tabular-nums; letter-spacing:-0.4px; margin-top:2px;">1,24 TB</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="position:relative; z-index:20; padding:14px 20px 8px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button onClick="{{ toggleFilterMenu }}" style="{{ filterPillCss }}">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" style="flex:0 0 auto;"><path d="M1.5 3h11M3.5 7h7M6 11h3"></path></svg>
+            <span>{{ filterLabel }}</span>
+            <span style="{{ filterCountCss }}">{{ filterCount }}</span>
+            <svg width="9" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto; opacity:0.55;"><path d="M1 1l4 4 4-4"></path></svg>
+          </button>
+
+          <button onClick="{{ toggleSortMenu }}" style="{{ sortPillCss }}">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto;"><path d="M4 2v10M1.8 9.8L4 12l2.2-2.2M10 12V2M7.8 4.2L10 2l2.2 2.2"></path></svg>
+            <span>{{ sortLabel }}</span>
+            <svg width="9" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto; opacity:0.55;"><path d="M1 1l4 4 4-4"></path></svg>
+          </button>
+
+          <button onClick="{{ toggleDir }}" style="{{ dirBtnCss }}">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{{ dirIconCss }}"><path d="M8 2.5v11M4 9.5L8 13.5l4-4"></path></svg>
+          </button>
+
+          <div style="flex:1; min-width:0;"></div>
+          <span style="font-size:13px; font-weight:510; color:var(--t2,rgba(60,60,67,0.6)); white-space:nowrap;">{{ listCaption }}</span>
+        </div>
+
+        <sc-if value="{{ menuFilter }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute; left:20px; top:54px; min-width:214px; background:var(--c1,#fff); border-radius:14px; padding:5px; box-shadow:0 12px 32px rgba(0,0,0,0.18), 0 0 0 0.5px var(--sep,rgba(60,60,67,0.16)); animation:qbFade 0.14s ease-out; z-index:30;">
+            <sc-for list="{{ filterOptions }}" as="f" hint-placeholder-count="5">
+              <button onClick="{{ f.pick }}" style="{{ f.css }}">
+                <span style="{{ f.checkCss }}">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 8.4l3.4 3.4L13.2 4.8"></path></svg>
+                </span>
+                <span style="flex:1; min-width:0; text-align:left;">{{ f.label }}</span>
+                <span style="font-size:13px; color:var(--t2,rgba(60,60,67,0.6)); font-variant-numeric:tabular-nums;">{{ f.count }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ menuSort }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute; left:20px; top:54px; min-width:198px; background:var(--c1,#fff); border-radius:14px; padding:5px; box-shadow:0 12px 32px rgba(0,0,0,0.18), 0 0 0 0.5px var(--sep,rgba(60,60,67,0.16)); animation:qbFade 0.14s ease-out; z-index:30;">
+            <sc-for list="{{ sortOptions }}" as="o" hint-placeholder-count="4">
+              <button onClick="{{ o.pick }}" style="{{ o.css }}">
+                <span style="{{ o.checkCss }}">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 8.4l3.4 3.4L13.2 4.8"></path></svg>
+                </span>
+                <span style="flex:1; min-width:0; text-align:left;">{{ o.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ closeMenus }}" style="position:fixed; inset:0; z-index:19;"></div>
+      </sc-if>
+
+      <div style="margin:0 16px 56px; background:var(--c1,#fff); border-radius:18px; overflow:hidden;">
+        <sc-for list="{{ torrents }}" as="t" hint-placeholder-count="6">
+          <div style="position:relative; overflow:hidden; background:var(--bad,#C80815);">
+            <div style="position:absolute; top:0; right:0; bottom:0; display:flex;">
+              <button onClick="{{ t.togglePause }}" style="width:76px; border:none; background:var(--warn,#FF9F0A); color:#fff; font:inherit; font-size:12px; font-weight:590; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
+                <svg width="17" height="17" viewBox="0 0 18 18" fill="currentColor"><rect x="4" y="3" width="3.4" height="12" rx="1.2"></rect><rect x="10.6" y="3" width="3.4" height="12" rx="1.2"></rect></svg>
+                <span>{{ t.pauseLabel }}</span>
+              </button>
+              <button onClick="{{ t.askDelete }}" style="width:76px; border:none; background:var(--bad,#C80815); color:#fff; font:inherit; font-size:12px; font-weight:590; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer;">
+                <svg width="17" height="17" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 4.6h12M7.2 4.6V3h3.6v1.6M4.6 4.6l.8 10.2h7.2l.8-10.2"></path></svg>
+                <span>Löschen</span>
+              </button>
+            </div>
+            <div onPointerDown="{{ t.pd }}" onPointerMove="{{ t.pm }}" onPointerUp="{{ t.pu }}" onPointerCancel="{{ t.pu }}" style="{{ t.rowCss }}">
+              <svg width="34" height="34" viewBox="0 0 34 34" style="flex:0 0 34px; margin-top:1px;">
+                <circle cx="17" cy="17" r="14" fill="none" stroke="var(--fill,rgba(118,118,128,0.12))" stroke-width="3"></circle>
+                <circle cx="17" cy="17" r="14" fill="none" stroke="{{ t.color }}" stroke-width="3" stroke-linecap="round" stroke-dasharray="{{ t.dash }}" transform="rotate(-90 17 17)"></circle>
+              </svg>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:15px; font-weight:590; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-0.2px;">{{ t.title }}</div>
+                <div style="font-size:12px; color:var(--t3,rgba(60,60,67,0.32)); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:500;">{{ t.line2 }}</div>
+                <div style="font-size:12.5px; margin-top:4px; display:flex; align-items:center; gap:6px; font-variant-numeric:tabular-nums; white-space:nowrap;">
+                  <span style="{{ t.badgeCss }}">{{ t.statusLabel }}</span>
+                  <span style="color:var(--t2,rgba(60,60,67,0.6)); overflow:hidden; text-overflow:ellipsis;">{{ t.line3 }}</span>
+                </div>
+              </div>
+              <svg width="8" height="13" viewBox="0 0 8 13" fill="none" stroke="var(--t3,rgba(60,60,67,0.32))" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto; margin-top:11px;"><path d="M1.5 1.5L6.5 6.5L1.5 11.5"></path></svg>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:44px 24px; text-align:center;">
+            <div style="font-size:15px; font-weight:590;">Keine Treffer</div>
+            <div style="font-size:13px; color:var(--t2,rgba(60,60,67,0.6)); margin-top:4px;">Passe Suche oder Filter an.</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:56px 20px 60px; animation:qbPush 0.3s cubic-bezier(0.32,0.72,0,1);">
+      <button onClick="{{ back }}" style="border:none; background:transparent; color:var(--ac,#C80815); font:inherit; font-size:17px; display:flex; align-items:center; gap:4px; cursor:pointer; padding:4px 0; margin-bottom:6px;">
+        <svg width="11" height="18" viewBox="0 0 11 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1.5L2 9l7 7.5"></path></svg>
+        <span>Torrents</span>
+      </button>
+      <div style="font-family:'WildBreath','Outfit',system-ui,sans-serif; font-size:46px; font-weight:400; letter-spacing:0.015em; line-height:1.0;">Einstellungen</div>
+
+      <div style="margin-top:18px; background:var(--c1,#fff); border-radius:18px; padding:16px; display:flex; align-items:center; gap:14px;">
+        <div style="width:44px; height:44px; border-radius:12px; background:var(--ok,#34C759); display:flex; align-items:center; justify-content:center; flex:0 0 auto;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:16px; font-weight:600;">Verbunden</div>
+          <div style="font-size:13px; color:var(--t2,rgba(60,60,67,0.6)); margin-top:1px;">192.168.178.165:8090 · qBittorrent 5.0.4</div>
+        </div>
+      </div>
+
+      <div style="font-size:13px; font-weight:590; color:var(--t2,rgba(60,60,67,0.6)); margin:26px 4px 8px; text-transform:uppercase; letter-spacing:0.5px;">Geschwindigkeit</div>
+      <div style="background:var(--c1,#fff); border-radius:18px; overflow:hidden;">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--sep,rgba(60,60,67,0.16)); gap:16px;">
+          <span style="font-size:16px;">Alternative Limits</span>
+          <button onClick="{{ toggleAlt }}" style="{{ altSwitchCss }}"><span style="{{ altKnobCss }}"></span></button>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid var(--sep,rgba(60,60,67,0.16)); gap:16px;">
+          <span style="font-size:16px;">Download-Limit</span>
+          <span style="font-size:16px; color:var(--t2,rgba(60,60,67,0.6)); font-variant-numeric:tabular-nums;">{{ dlLimit }}</span>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:13px 16px; gap:16px;">
+          <span style="font-size:16px;">Upload-Limit</span>
+          <span style="font-size:16px; color:var(--t2,rgba(60,60,67,0.6)); font-variant-numeric:tabular-nums;">{{ upLimit }}</span>
+        </div>
+      </div>
+
+      <div style="font-size:13px; font-weight:590; color:var(--t2,rgba(60,60,67,0.6)); margin:26px 4px 8px; text-transform:uppercase; letter-spacing:0.5px;">Darstellung</div>
+      <div style="background:var(--c1,#fff); border-radius:18px; padding:14px 16px;">
+        <div style="font-size:16px; margin-bottom:10px;">Erscheinungsbild</div>
+        <div style="display:flex; background:var(--fill,rgba(118,118,128,0.12)); border-radius:9px; padding:2px; gap:2px;">
+          <sc-for list="{{ appearance }}" as="a" hint-placeholder-count="3">
+            <button onClick="{{ a.pick }}" style="{{ a.css }}">{{ a.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="font-size:13px; font-weight:590; color:var(--t2,rgba(60,60,67,0.6)); margin:26px 4px 8px; text-transform:uppercase; letter-spacing:0.5px;">Verhalten</div>
+      <div style="background:var(--c1,#fff); border-radius:18px; overflow:hidden;">
+        <sc-for list="{{ behaviour }}" as="b" hint-placeholder-count="3">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--sep,rgba(60,60,67,0.16)); gap:16px;">
+            <div style="min-width:0;">
+              <div style="font-size:16px;">{{ b.k }}</div>
+              <div style="font-size:12.5px; color:var(--t2,rgba(60,60,67,0.6)); margin-top:1px;">{{ b.d }}</div>
+            </div>
+            <button onClick="{{ b.toggle }}" style="{{ b.switchCss }}"><span style="{{ b.knobCss }}"></span></button>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute; inset:0; background:var(--bg,#F2F2F7); z-index:40; animation:qbPush 0.3s cubic-bezier(0.32,0.72,0,1); display:flex; flex-direction:column;">
+    <div style="flex:0 0 auto; padding:56px 12px 8px; background:var(--nav,rgba(249,249,249,0.8)); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:0.5px solid var(--sep,rgba(60,60,67,0.16)); display:flex; align-items:center; gap:2px;">
+      <button onClick="{{ back }}" style="border:none; background:transparent; color:var(--ac,#C80815); font:inherit; font-size:17px; display:flex; align-items:center; gap:4px; cursor:pointer; padding:4px 6px; flex:0 0 auto;">
+        <svg width="11" height="18" viewBox="0 0 11 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1.5L2 9l7 7.5"></path></svg>
+        <span>Torrents</span>
+      </button>
+      <div style="flex:1; min-width:0; text-align:center; font-size:16px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:0 4px;">{{ cur.short }}</div>
+      <button onClick="{{ askDeleteCur }}" style="border:none; background:transparent; color:var(--ac,#C80815); font:inherit; font-size:17px; cursor:pointer; padding:4px 8px; flex:0 0 auto; display:flex; align-items:center;">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4" r="1.7"></circle><circle cx="10" cy="10" r="1.7"></circle><circle cx="10" cy="16" r="1.7"></circle></svg>
+      </button>
+    </div>
+
+    <div style="flex:1; overflow-y:auto; padding:16px 20px 40px;">
+      <div style="font-size:19px; font-weight:640; line-height:1.28; letter-spacing:-0.3px; text-wrap:pretty;">{{ cur.title }}</div>
+      <div style="font-size:13px; color:var(--t2,rgba(60,60,67,0.6)); margin-top:4px;">{{ cur.line2 }}</div>
+
+      <div style="margin-top:16px; background:var(--c1,#fff); border-radius:18px; padding:16px;">
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+          <span style="font-size:30px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-0.8px; color:{{ cur.color }};">{{ cur.pct }}</span>
+          <span style="font-size:13px; color:var(--t2,rgba(60,60,67,0.6)); font-variant-numeric:tabular-nums; white-space:nowrap;">{{ cur.doneOf }}</span>
+        </div>
+        <div style="margin-top:10px; height:8px; border-radius:4px; background:var(--fill,rgba(118,118,128,0.12)); overflow:hidden;">
+          <div style="{{ cur.barCss }}"></div>
+        </div>
+        <div style="display:flex; margin-top:16px; gap:12px;">
+          <div style="flex:1; border-right:1px solid var(--sep,rgba(60,60,67,0.16));">
+            <div style="font-size:11px; font-weight:590; color:var(--t2,rgba(60,60,67,0.6)); text-transform:uppercase; letter-spacing:0.4px;">Download</div>
+            <div style="font-size:19px; font-weight:640; font-variant-numeric:tabular-nums; margin-top:2px; white-space:nowrap; color:var(--dl,#007AFF);">{{ cur.dl }}</div>
+          </div>
+          <div style="flex:1; border-right:1px solid var(--sep,rgba(60,60,67,0.16)); padding-left:12px;">
+            <div style="font-size:11px; font-weight:590; color:var(--t2,rgba(60,60,67,0.6)); text-transform:uppercase; letter-spacing:0.4px;">Upload</div>
+            <div style="font-size:19px; font-weight:640; font-variant-numeric:tabular-nums; margin-top:2px; white-space:nowrap; color:var(--ok,#34C759);">{{ cur.up }}</div>
+          </div>
+          <div style="flex:1; padding-left:12px;">
+            <div style="font-size:11px; font-weight:590; color:var(--t2,rgba(60,60,67,0.6)); text-transform:uppercase; letter-spacing:0.4px;">Rest</div>
+            <div style="font-size:19px; font-weight:640; font-variant-numeric:tabular-nums; margin-top:2px; white-space:nowrap;">{{ cur.eta }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button onClick="{{ togglePauseCur }}" style="flex:1; border:none; border-radius:14px; background:var(--c1,#fff); color:var(--t2,rgba(60,60,67,0.6)); font:inherit; font-size:12px; font-weight:590; padding:12px 4px; display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><rect x="4.6" y="3.4" width="3.8" height="13.2" rx="1.4"></rect><rect x="11.6" y="3.4" width="3.8" height="13.2" rx="1.4"></rect></svg>
+          <span>{{ cur.pauseLabel }}</span>
+        </button>
+        <button onClick="{{ toast }}" style="flex:1; border:none; border-radius:14px; background:var(--c1,#fff); color:var(--t2,rgba(60,60,67,0.6)); font:inherit; font-size:12px; font-weight:590; padding:12px 4px; display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 10a6.5 6.5 0 11-2.2-4.9"></path><path d="M17 2.5V6h-3.5"></path></svg>
+          <span>Neu melden</span>
+        </button>
+        <button onClick="{{ toast }}" style="flex:1; border:none; border-radius:14px; background:var(--c1,#fff); color:var(--t2,rgba(60,60,67,0.6)); font:inherit; font-size:12px; font-weight:590; padding:12px 4px; display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13V2.8M6.6 6L10 2.6 13.4 6"></path><path d="M3.4 12v4.2a1 1 0 001 1h11.2a1 1 0 001-1V12"></path></svg>
+          <span>Teilen</span>
+        </button>
+        <button onClick="{{ askDeleteCur }}" style="flex:1; border:none; border-radius:14px; background:var(--c1,#fff); color:var(--bad,#C80815); font:inherit; font-size:12px; font-weight:590; padding:12px 4px; display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 5.2h13.2M8 5.2V3.4h4v1.8M5.2 5.2l.9 11.4h7.8l.9-11.4"></path></svg>
+          <span>Löschen</span>
+        </button>
+      </div>
+
+      <div style="display:flex; background:var(--fill,rgba(118,118,128,0.12)); border-radius:9px; padding:2px; gap:2px; margin-top:20px;">
+        <sc-for list="{{ dtabs }}" as="d" hint-placeholder-count="3">
+          <button onClick="{{ d.pick }}" style="{{ d.css }}">{{ d.label }}</button>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{ dInfo }}" hint-placeholder-val="{{ true }}">
+      <div style="margin-top:14px; background:var(--c1,#fff); border-radius:18px; overflow:hidden;">
+        <sc-for list="{{ cur.info }}" as="r" hint-placeholder-count="8">
+          <div style="display:flex; align-items:baseline; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--sep,rgba(60,60,67,0.16)); gap:16px;">
+            <span style="font-size:15px; flex:0 0 auto;">{{ r.k }}</span>
+            <span style="{{ r.vCss }}">{{ r.v }}</span>
+          </div>
+        </sc-for>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ dFiles }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:14px; background:var(--c1,#fff); border-radius:18px; overflow:hidden;">
+        <sc-for list="{{ cur.files }}" as="f" hint-placeholder-count="5">
+          <div style="padding:12px 16px; border-bottom:1px solid var(--sep,rgba(60,60,67,0.16));">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+              <span style="font-size:14px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ f.n }}</span>
+              <span style="font-size:13px; color:var(--t2,rgba(60,60,67,0.6)); font-variant-numeric:tabular-nums; flex:0 0 auto;">{{ f.s }}</span>
+            </div>
+            <div style="margin-top:7px; height:3px; border-radius:2px; background:var(--fill,rgba(118,118,128,0.12)); overflow:hidden;">
+              <div style="{{ f.barCss }}"></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ dTrackers }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:14px; background:var(--c1,#fff); border-radius:18px; overflow:hidden;">
+        <sc-for list="{{ cur.trackers }}" as="tr" hint-placeholder-count="6">
+          <div style="display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--sep,rgba(60,60,67,0.16));">
+            <span style="{{ tr.dotCss }}"></span>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:14px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ tr.url }}</div>
+              <div style="font-size:12px; color:var(--t2,rgba(60,60,67,0.6)); margin-top:1px;">{{ tr.status }}</div>
+            </div>
+            <span style="font-size:13px; color:var(--t2,rgba(60,60,67,0.6)); font-variant-numeric:tabular-nums; flex:0 0 auto;">{{ tr.peers }}</span>
+          </div>
+        </sc-for>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ sheetAdd }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute; inset:0; z-index:60; background:rgba(0,0,0,0.32); animation:qbFade 0.25s ease-out; display:flex; flex-direction:column; justify-content:flex-end;">
+    <div onClick="{{ closeSheet }}" style="flex:1;"></div>
+    <div style="background:var(--bg,#F2F2F7); border-radius:22px 22px 0 0; padding:8px 20px 34px; animation:qbSheet 0.34s cubic-bezier(0.32,0.72,0,1); max-height:82%; overflow-y:auto;">
+      <div style="width:36px; height:5px; border-radius:3px; background:var(--t3,rgba(60,60,67,0.32)); margin:0 auto 14px;"></div>
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+        <button onClick="{{ closeSheet }}" style="border:none; background:transparent; color:var(--ac,#C80815); font:inherit; font-size:17px; cursor:pointer; padding:2px 0;">Abbrechen</button>
+        <span style="font-size:16px; font-weight:600;">Torrent hinzufügen</span>
+        <button onClick="{{ confirmAdd }}" style="border:none; background:transparent; color:var(--ac,#C80815); font:inherit; font-size:17px; font-weight:600; cursor:pointer; padding:2px 0;">Fertig</button>
+      </div>
+
+      <div style="margin-top:18px; background:var(--c1,#fff); border-radius:14px; padding:12px 14px;">
+        <div style="font-size:11px; font-weight:590; color:var(--t2,rgba(60,60,67,0.6)); text-transform:uppercase; letter-spacing:0.5px;">Magnet-Link oder URL</div>
+        <input value="{{ magnet }}" onChange="{{ onMagnet }}" placeholder="magnet:?xt=urn:btih:…" style="width:100%; border:none; outline:none; background:transparent; margin-top:6px; font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:13px; color:var(--t1,#000); padding:0;" />
+      </div>
+
+      <div style="font-size:13px; font-weight:590; color:var(--t2,rgba(60,60,67,0.6)); margin:20px 4px 8px; text-transform:uppercase; letter-spacing:0.5px;">Kategorie</div>
+      <div style="background:var(--c1,#fff); border-radius:14px; overflow:hidden;">
+        <sc-for list="{{ cats }}" as="c" hint-placeholder-count="4">
+          <button onClick="{{ c.pick }}" style="width:100%; border:none; background:transparent; font:inherit; display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--sep,rgba(60,60,67,0.16)); cursor:pointer; color:var(--t1,#000); text-align:left; gap:12px;">
+            <span style="font-size:16px;">{{ c.label }}</span>
+            <span style="{{ c.checkCss }}">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 8.4l3.4 3.4L13.2 4.8"></path></svg>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+
+      <div style="font-size:13px; font-weight:590; color:var(--t2,rgba(60,60,67,0.6)); margin:20px 4px 8px; text-transform:uppercase; letter-spacing:0.5px;">Ziel</div>
+      <div style="background:var(--c1,#fff); border-radius:14px; overflow:hidden;">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--sep,rgba(60,60,67,0.16)); gap:12px;">
+          <span style="font-size:16px; flex:0 0 auto;">Speicherpfad</span>
+          <span style="font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:13px; color:var(--t2,rgba(60,60,67,0.6)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; direction:rtl;">{{ savePath }}</span>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 16px; gap:12px;">
+          <span style="font-size:16px;">Sofort starten</span>
+          <button onClick="{{ toggleStart }}" style="{{ startSwitchCss }}"><span style="{{ startKnobCss }}"></span></button>
+        </div>
+      </div>
+
+      <button onClick="{{ confirmAdd }}" style="width:100%; margin-top:22px; border:none; border-radius:14px; background:var(--ac,#C80815); color:#fff; font:inherit; font-size:17px; font-weight:600; padding:15px; cursor:pointer;">Hinzufügen</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ sheetDel }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute; inset:0; z-index:60; background:rgba(0,0,0,0.32); animation:qbFade 0.25s ease-out; display:flex; flex-direction:column; justify-content:flex-end; padding:10px;">
+    <div onClick="{{ closeSheet }}" style="flex:1;"></div>
+    <div style="animation:qbSheet 0.3s cubic-bezier(0.32,0.72,0,1);">
+      <div style="background:var(--c1,#fff); border-radius:16px; overflow:hidden; text-align:center;">
+        <div style="padding:16px 20px 14px; border-bottom:1px solid var(--sep,rgba(60,60,67,0.16));">
+          <div style="font-size:15px; font-weight:640;">Torrent entfernen?</div>
+          <div style="font-size:13px; color:var(--t2,rgba(60,60,67,0.6)); margin-top:4px; line-height:1.35; text-wrap:pretty;">{{ delName }}</div>
+        </div>
+        <button onClick="{{ toggleDelFiles }}" style="width:100%; border:none; background:transparent; font:inherit; display:flex; align-items:center; justify-content:space-between; padding:12px 18px; border-bottom:1px solid var(--sep,rgba(60,60,67,0.16)); cursor:pointer; color:var(--t1,#000); gap:12px;">
+          <span style="font-size:15px;">Dateien auch löschen</span>
+          <span style="{{ delSwitchCss }}"><span style="{{ delKnobCss }}"></span></span>
+        </button>
+        <button onClick="{{ confirmDelete }}" style="width:100%; border:none; background:transparent; font:inherit; font-size:17px; font-weight:600; color:var(--bad,#C80815); padding:14px; cursor:pointer;">Entfernen</button>
+      </div>
+      <button onClick="{{ closeSheet }}" style="width:100%; margin-top:8px; border:none; border-radius:16px; background:var(--c1,#fff); font:inherit; font-size:17px; font-weight:600; color:var(--ac,#C80815); padding:15px; cursor:pointer;">Abbrechen</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute; left:50%; bottom:56px; z-index:70; transform:translateX(-50%); animation:qbToast 1.8s ease-out forwards; background:rgba(30,30,32,0.92); backdrop-filter:blur(12px); color:#fff; font-size:14px; font-weight:510; padding:10px 18px; border-radius:22px; white-space:nowrap; box-shadow:0 8px 24px rgba(0,0,0,0.22);">{{ toastMsg }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:402,&quot;height&quot;:874},&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Darstellung&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#C80815&quot;,&quot;options&quot;:[&quot;#C80815&quot;,&quot;#E0202C&quot;,&quot;#2F67BA&quot;,&quot;#FF9F0A&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Darstellung&quot;},&quot;initialScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;list&quot;,&quot;detail&quot;,&quot;settings&quot;,&quot;add&quot;],&quot;default&quot;:&quot;list&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Start&quot;},&quot;liveData&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Start&quot;}}">
+const CIRC = 2 * Math.PI * 14;
+
+const DARK = {
+  '--bg': '#1C1D22', '--c1': '#25272D', '--sep': 'rgba(255,255,255,0.06)',
+  '--t1': '#F5F5F7', '--t2': 'rgba(245,245,247,0.72)', '--t3': 'rgba(245,245,247,0.48)',
+  '--fill': '#2D3038', '--nav': 'rgba(37,39,45,0.88)',
+  '--ac': '#E0202C', '--dl': '#0A84FF', '--ok': '#3DC960', '--warn': '#E8A033', '--bad': '#E0202C'
+};
+const LIGHT = {
+  '--bg': '#F2F2F7', '--c1': '#FFFFFF', '--sep': 'rgba(60,60,67,0.16)',
+  '--t1': '#000000', '--t2': 'rgba(60,60,67,0.60)', '--t3': 'rgba(60,60,67,0.32)',
+  '--fill': 'rgba(118,118,128,0.12)', '--nav': 'rgba(249,249,249,0.80)',
+  '--ac': '#C80815', '--dl': '#007AFF', '--ok': '#34C759', '--warn': '#FF9F0A', '--bad': '#C80815'
+};
+
+const G = 1024 * 1024 * 1024;
+
+const SEED = [
+  { id: 1, title: 'THE MUSKETEERS (2014–2016) Komplette Serie', short: 'The Musketeers', tags: '1080p · BluRay · x265', cat: 'tv-sonarr', size: 35.56 * G, prog: 0.15, st: 'downloading', dl: 85900, up: 0, seeds: '1 (12)', peers: '0 (5)', ratio: 0, added: '05.08.2026, 09:29', tracker: 'exodus.desync.com' },
+  { id: 10, title: 'Friends (1994) S01 · 1080p BluRay REMUX', short: 'Friends S01', tags: '1080p · REMUX · DTS-HD', cat: 'tv-sonarr', size: 6.05 * G, prog: 1, st: 'seeding', dl: 0, up: 620000, seeds: '0 (367)', peers: '0 (263)', ratio: 0.0, added: '04.08.2026, 02:01', tracker: 'nyaa.tracker.wf' },
+  { id: 3, title: 'Edge of Tomorrow (2014) 1080p NF WEB-DL', short: 'Edge of Tomorrow', tags: '1080p · WEB-DL · DDP5.1', cat: 'radarr', size: 2.63 * G, prog: 1, st: 'seeding', dl: 0, up: 41000, seeds: '0 (87)', peers: '0 (9)', ratio: 0.0, added: '05.08.2026, 11:20', tracker: 'open.stealth.si' },
+  { id: 6, title: 'Scary Movie 4 (2006) 1080p AMZN WEB-DL', short: 'Scary Movie 4', tags: '1080p · AMZN · x264', cat: 'radarr', size: 5.24 * G, prog: 1, st: 'stalled', dl: 0, up: 0, seeds: '0 (17)', peers: '0 (4)', ratio: 0.0, added: '04.08.2026, 04:26', tracker: 'open.demonii.com' },
+  { id: 2, title: 'Fate/stay night: Unlimited Blade Works', short: 'Unlimited Blade Works', tags: '1080p · BluRay · FLAC', cat: 'tv-sonarr', size: 7.54 * G, prog: 1, st: 'completed', dl: 0, up: 0, seeds: '0 (0)', peers: '0 (1)', ratio: 0.55, added: '07.11.2025, 09:36', tracker: 'nyaa.tracker.wf' },
+  { id: 4, title: 'Demon Slayer: Kimetsu no Yaiba', short: 'Demon Slayer', tags: '1080p · BluRay · x265', cat: 'radarr', size: 8.0 * G, prog: 1, st: 'completed', dl: 0, up: 0, seeds: '0 (0)', peers: '0 (100)', ratio: 2.73, added: '22.10.2025, 09:31', tracker: 'exodus.desync.com' },
+  { id: 9, title: '[One Pace][1-7] Romance Dawn', short: 'One Pace: Romance Dawn', tags: '1080p · WEB · AAC', cat: 'tv-sonarr', size: 1.65 * G, prog: 1, st: 'completed', dl: 0, up: 0, seeds: '0 (0)', peers: '0 (32)', ratio: 0.11, added: '16.05.2026, 08:08', tracker: 'nyaa.tracker.wf' },
+  { id: 5, title: 'Mortal Kombat II (2026) 1080p AMZN WEB-DL', short: 'Mortal Kombat II', tags: '1080p · AMZN · DDP5.1', cat: 'radarr', size: 2.34 * G, prog: 1, st: 'queued', dl: 0, up: 0, seeds: '0 (10)', peers: '0 (3)', ratio: 0.45, added: '04.08.2026, 03:24', tracker: 'open.stealth.si' },
+  { id: 7, title: "Hitman's Wife's Bodyguard (2021) EXTENDED", short: "Hitman's Wife's Bodyguard", tags: '1080p · BluRay · x264', cat: 'radarr', size: 6.94 * G, prog: 1, st: 'queued', dl: 0, up: 0, seeds: '0 (16)', peers: '0 (1)', ratio: 0.05, added: '16.02.2026, 01:21', tracker: 'open.tracker.cl' },
+  { id: 8, title: 'Avatar: Aang – The Last Airbender (2024)', short: 'Avatar: The Last Airbender', tags: '2160p · NF · WEB-DL', cat: 'radarr', size: 16.11 * G, prog: 1, st: 'queued', dl: 0, up: 0, seeds: '0 (41)', peers: '0 (26)', ratio: 0, added: '04.08.2026, 04:27', tracker: 'ipv4.tracker.harry.lu' }
+];
+
+const ST = {
+  downloading: { label: 'Lädt', color: 'var(--dl,#007AFF)' },
+  seeding: { label: 'Verteilt', color: 'var(--ok,#34C759)' },
+  completed: { label: 'Fertig', color: 'var(--ok,#34C759)' },
+  queued: { label: 'Wartet', color: 'var(--t3,rgba(60,60,67,0.32))' },
+  stalled: { label: 'Stockt', color: 'var(--warn,#FF9F0A)' },
+  paused: { label: 'Pausiert', color: 'var(--warn,#FF9F0A)' },
+  error: { label: 'Fehler', color: 'var(--bad,#C80815)' }
+};
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.rootRef = React.createRef();
+    this.data = SEED.map(t => Object.assign({}, t, { done: t.size * t.prog }));
+    this.hist = Array.from({ length: 30 }, (_, i) => ({ d: 60 + Math.sin(i / 3) * 25 + Math.random() * 20, u: 300 + Math.cos(i / 4) * 180 + Math.random() * 120 }));
+    this.state = {
+      screen: props.initialScreen || 'list', sel: props.initialScreen === 'detail' ? 1 : null,
+      dtab: 'info', sheet: props.initialScreen === 'add' ? 'add' : null,
+      filter: 'active', q: '', sort: 'status', dir: 1, menu: null, open: null, drag: 0, dragId: null,
+      alt: false, delFiles: false, delId: null, startNow: true, cat: 'radarr',
+      magnet: 'magnet:?xt=urn:btih:a1c4f9e2b7…', toastMsg: '', tick: 0,
+      behave: [true, true, false]
+    };
+  }
+
+  componentDidMount() { this.applyTheme(); if (this.props.liveData !== false) this.timer = setInterval(() => this.tick(), 1100); }
+  componentDidUpdate(p) { if (p.dark !== this.props.dark || p.accent !== this.props.accent) this.applyTheme(); }
+  componentWillUnmount() { clearInterval(this.timer); clearTimeout(this.tt); }
+
+  applyTheme() {
+    const el = this.rootRef.current; if (!el) return;
+    const vars = this.props.dark ? DARK : LIGHT;
+    Object.keys(vars).forEach(k => el.style.setProperty(k, vars[k]));
+    if (this.props.accent) el.style.setProperty('--ac', this.props.accent);
+    const doc = el.ownerDocument;
+    if (doc && doc.body && doc.querySelectorAll('.sc-host').length === 1) doc.body.style.background = vars['--bg'];
+  }
+
+  tick() {
+    const d = this.data.find(t => t.st === 'downloading');
+    if (d) {
+      d.dl = 62000 + Math.random() * 48000;
+      d.done = Math.min(d.size, d.done + d.dl * 1.1);
+      d.prog = d.done / d.size;
+    }
+    this.data.filter(t => t.st === 'seeding').forEach(t => { t.up = t.up > 100000 ? 380000 + Math.random() * 420000 : 18000 + Math.random() * 46000; });
+    this.hist.push({ d: this.sum('dl') / 1024, u: this.sum('up') / 1024 });
+    if (this.hist.length > 30) this.hist.shift();
+    this.setState(s => ({ tick: s.tick + 1 }));
+  }
+
+  sum(k) { return this.data.reduce((a, t) => a + (t.st === 'paused' ? 0 : t[k]), 0); }
+
+  num(v, d) { return v.toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+
+  size(b) {
+    const u = ['B', 'KB', 'MB', 'GB', 'TB']; let i = 0;
+    while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
+    return this.num(b, i === 0 ? 0 : (b < 10 ? 2 : 1)) + ' ' + u[i];
+  }
+
+  speed(b) { return b < 512 ? '0 B/s' : this.size(b) + '/s'; }
+
+  eta(t) {
+    if (t.st !== 'downloading' || t.dl < 1) return '∞';
+    let s = (t.size - t.done) / t.dl;
+    const dd = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+    if (dd) return dd + ' T ' + h + ' Std';
+    if (h) return h + ' Std ' + m + ' Min';
+    return Math.max(1, m) + ' Min';
+  }
+
+  toastMsg(m) { clearTimeout(this.tt); this.setState({ toastMsg: m }); this.tt = setTimeout(() => this.setState({ toastMsg: '' }), 1800); }
+
+  filtered() {
+    const q = this.state.q.trim().toLowerCase();
+    let l = this.data.filter(t => {
+      if (q && t.title.toLowerCase().indexOf(q) < 0 && t.cat.indexOf(q) < 0) return false;
+      const f = this.state.filter;
+      if (f === 'active') return t.st === 'downloading' || (t.st === 'seeding' && t.up > 512);
+      if (f === 'down') return t.st === 'downloading';
+      if (f === 'done') return t.prog >= 1 && t.st !== 'queued';
+      if (f === 'paused') return t.st === 'paused' || t.st === 'queued';
+      return true;
+    });
+    const so = this.state.sort;
+    if (so === 'name') l = l.slice().sort((a, b) => a.title.localeCompare(b.title, 'de'));
+    else if (so === 'size') l = l.slice().sort((a, b) => b.size - a.size);
+    else if (so === 'progress') l = l.slice().sort((a, b) => b.prog - a.prog);
+    return this.state.dir === -1 ? l.slice().reverse() : l;
+  }
+
+  count(f) {
+    const c = this.data;
+    if (f === 'active') return c.filter(t => t.st === 'downloading' || (t.st === 'seeding' && t.up > 512)).length;
+    if (f === 'down') return c.filter(t => t.st === 'downloading').length;
+    if (f === 'done') return c.filter(t => t.prog >= 1 && t.st !== 'queued').length;
+    if (f === 'paused') return c.filter(t => t.st === 'paused' || t.st === 'queued').length;
+    return c.length;
+  }
+
+  pd(id, e) { this._sx = e.clientX; this._sid = id; this._mv = false; if (this.state.open && this.state.open !== id) this.setState({ open: null, drag: 0, dragId: null }); }
+  pm(id, e) {
+    if (this._sid !== id || this._sx == null) return;
+    const d = e.clientX - this._sx;
+    if (Math.abs(d) > 5) this._mv = true;
+    const base = this.state.open === id ? -152 : 0;
+    this.setState({ drag: Math.max(-176, Math.min(0, base + d)), dragId: id });
+  }
+  pu(id) {
+    if (this._sx == null) return;
+    const mv = this._mv, d = this.state.drag; this._sx = null; this._sid = null;
+    if (!mv) {
+      if (this.state.open === id) this.setState({ open: null, drag: 0, dragId: null });
+      else this.setState({ screen: 'detail', sel: id, dtab: 'info', open: null, drag: 0, dragId: null });
+      return;
+    }
+    const o = d < -70;
+    this.setState({ open: o ? id : null, drag: o ? -152 : 0, dragId: o ? id : null });
+  }
+
+  togglePause(id) {
+    const t = this.data.find(x => x.id === id); if (!t) return;
+    if (t.st === 'paused') { t.st = t.prog >= 1 ? 'seeding' : 'downloading'; this.toastMsg('Fortgesetzt'); }
+    else { t._prev = t.st; t.st = 'paused'; t.dl = 0; t.up = 0; this.toastMsg('Pausiert'); }
+    this.setState({ open: null, drag: 0, dragId: null });
+  }
+
+  sw(on) {
+    return 'width:51px; height:31px; border-radius:16px; border:none; padding:2px; cursor:pointer; flex:0 0 auto; display:flex; align-items:center; transition:background 0.22s; justify-content:' +
+      (on ? 'flex-end' : 'flex-start') + '; background:' + (on ? 'var(--ok,#34C759)' : 'var(--fill,rgba(118,118,128,0.16))') + ';';
+  }
+  knob() { return 'display:block; width:27px; height:27px; border-radius:14px; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.18);'; }
+
+  segCss(on) {
+    return 'flex:1; border:none; border-radius:7px; font:inherit; font-size:13px; font-weight:590; padding:7px 4px; cursor:pointer; transition:background 0.18s; background:' +
+      (on ? 'var(--c1,#fff)' : 'transparent') + '; color:var(--t1,#000); box-shadow:' + (on ? '0 1px 3px rgba(0,0,0,0.12)' : 'none') + ';';
+  }
+
+  renderVals() {
+    const s = this.state, self = this;
+    const list = this.filtered();
+    const dark = !!this.props.dark;
+
+    const torrents = list.map(t => {
+      const stt = ST[t.st] || ST.queued;
+      const pct = Math.min(1, t.prog);
+      const active = s.open === t.id || s.dragId === t.id;
+      let line3 = '';
+      if (t.st === 'downloading') line3 = this.num(pct * 100, 0) + ' % · ↓ ' + this.speed(t.dl) + ' · noch ' + this.eta(t);
+      else if (t.st === 'seeding') line3 = '↑ ' + this.speed(t.up) + ' · ' + t.peers.replace(/[()]/g, '').trim().split(' ').pop() + ' Peers';
+      else if (t.st === 'completed') line3 = 'Verhältnis ' + this.num(t.ratio, 2);
+      else if (t.st === 'queued') line3 = 'In Warteschlange';
+      else if (t.st === 'paused') line3 = this.size(t.done) + ' geladen';
+      else line3 = 'Keine Verbindung zu Peers';
+      return {
+        id: t.id, title: t.title, line2: t.tags + ' · ' + this.size(t.size) + ' · ' + t.cat, line3,
+        statusLabel: stt.label, color: stt.color,
+        pctShort: pct >= 1 ? '100' : Math.round(pct * 100),
+        dash: (CIRC * pct).toFixed(1) + ' ' + CIRC.toFixed(1),
+        pauseLabel: t.st === 'paused' ? 'Start' : 'Pause',
+        badgeCss: 'font-size:12.5px; font-weight:600; flex:0 0 auto; color:' + stt.color + ';',
+        rowCss: 'position:relative; display:flex; gap:12px; padding:12px 14px 12px 16px; align-items:flex-start; background:var(--c1,#fff); cursor:pointer; touch-action:pan-y; user-select:none; border-bottom:1px solid var(--sep,rgba(60,60,67,0.16)); transform:translateX(' +
+          (active ? s.drag : 0) + 'px); transition:' + (s.dragId === t.id && this._sx != null ? 'none' : 'transform 0.28s cubic-bezier(0.32,0.72,0,1)') + ';',
+        pd: e => self.pd(t.id, e), pm: e => self.pm(t.id, e), pu: () => self.pu(t.id),
+        togglePause: () => self.togglePause(t.id),
+        askDelete: () => self.setState({ sheet: 'del', delId: t.id, open: null, drag: 0, dragId: null })
+      };
+    });
+
+    const FILTERS = [['active', 'Aktiv'], ['all', 'Alle'], ['down', 'Lädt'], ['done', 'Fertig'], ['paused', 'Wartet']];
+    const SORTS = [['status', 'Status'], ['name', 'Name'], ['size', 'Größe'], ['progress', 'Fortschritt']];
+
+    const menuItem = on => 'width:100%; display:flex; align-items:center; gap:9px; border:none; background:transparent; cursor:pointer; font:inherit; font-size:15px; font-weight:' +
+      (on ? '590' : '400') + '; color:var(--t1,#000); padding:9px 10px; border-radius:9px; text-align:left;';
+    const check = on => 'display:flex; align-items:center; flex:0 0 14px; color:var(--ac,#C80815); opacity:' + (on ? '1' : '0') + ';';
+    const pill = open => 'display:flex; align-items:center; gap:6px; flex:0 0 auto; border:none; cursor:pointer; font:inherit; font-size:13.5px; font-weight:590; padding:7px 11px; border-radius:16px; white-space:nowrap; color:' +
+      (dark ? '#fff' : 'var(--ac,#C80815)') + '; background:' +
+      (dark ? 'var(--ac,#E0202C)' : (open ? 'var(--c1,#fff)' : 'var(--fill,rgba(118,118,128,0.12))')) +
+      '; box-shadow:' + (open ? (dark ? '0 4px 14px rgba(224,32,44,0.35)' : '0 2px 10px rgba(0,0,0,0.12)') : 'none') + ';';
+
+    const filterOptions = FILTERS.map(([k, label]) => ({
+      label, count: this.count(k), css: menuItem(s.filter === k), checkCss: check(s.filter === k),
+      pick: () => this.setState({ filter: k, menu: null })
+    }));
+    const sortOptions = SORTS.map(([k, label]) => ({
+      label, css: menuItem(s.sort === k), checkCss: check(s.sort === k),
+      pick: () => this.setState({ sort: k, menu: null })
+    }));
+    const curFilter = FILTERS.filter(f => f[0] === s.filter)[0] || FILTERS[0];
+
+    const cur = (() => {
+      const t = this.data.find(x => x.id === s.sel) || this.data[0];
+      const stt = ST[t.st] || ST.queued;
+      const files = t.id === 1
+        ? [['S01E01 – Friends and Enemies.mkv', 2.14, 1], ['S01E02 – Sleight of Hand.mkv', 2.02, 1], ['S01E03 – Commodities.mkv', 2.21, 0.42], ['S01E04 – The Good Traitor.mkv', 2.08, 0], ['S01E05 – The Homecoming.mkv', 2.17, 0]]
+        : [[t.short + '.mkv', t.size / G - 0.02, 1], ['subs/German.srt', 0.0001, 1], [t.short + '.nfo', 0.0001, 1]];
+      return {
+        title: t.title, short: t.short, line2: t.tags + ' · ' + this.size(t.size) + ' · ' + t.cat,
+        pct: this.num(Math.min(1, t.prog) * 100, 1) + ' %', color: stt.color,
+        doneOf: this.size(t.done) + ' von ' + this.size(t.size),
+        barCss: 'height:100%; border-radius:4px; background:' + stt.color + '; width:' + (Math.min(1, t.prog) * 100).toFixed(1) + '%; transition:width 0.9s linear;',
+        dl: this.speed(t.dl), up: this.speed(t.up), eta: this.eta(t),
+        pauseLabel: t.st === 'paused' ? 'Fortsetzen' : 'Pausieren',
+        info: [
+          ['Status', stt.label], ['Kategorie', t.cat], ['Verhältnis', this.num(t.ratio, 2)],
+          ['Seeds', t.seeds], ['Peers', t.peers], ['Hinzugefügt', t.added],
+          ['Speicherpfad', t.cat === 'radarr' ? '/downloads/movies' : '/downloads/tv'],
+          ['Hash', 'a1c4f9e2b7d83f' + t.id + '…']
+        ].map(([k, v]) => ({ k, v, vCss: 'font-size:15px; color:var(--t2,rgba(60,60,67,0.6)); font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:500;' })),
+        files: files.map(([n, g, p]) => ({
+          n, s: this.size(g * G),
+          barCss: 'height:100%; border-radius:2px; background:' + (p >= 1 ? 'var(--ok,#34C759)' : 'var(--dl,#007AFF)') + '; width:' + (p * 100) + '%;'
+        })),
+        trackers: [
+          [t.tracker + ':6969/announce', 'Arbeitet', '12'], ['open.stealth.si:80/announce', 'Arbeitet', '5'],
+          ['tracker.opentrackr.org:1337', 'Arbeitet', '8'], ['ipv4.tracker.harry.lu:80', 'Nicht erreichbar', '0'],
+          ['** [DHT] **', 'Arbeitet', '31'], ['** [PeX] **', 'Arbeitet', '4']
+        ].map(([url, status, peers]) => ({
+          url, status, peers,
+          dotCss: 'width:8px; height:8px; border-radius:5px; flex:0 0 auto; background:' + (status === 'Arbeitet' ? 'var(--ok,#34C759)' : 'var(--bad,#C80815)') + ';'
+        }))
+      };
+    })();
+
+    const dtabs = [['info', 'Info'], ['files', 'Dateien'], ['trackers', 'Tracker']].map(([k, label]) => ({
+      label, pick: () => this.setState({ dtab: k }), css: this.segCss(s.dtab === k)
+    }));
+
+    const appearance = [['light', 'Hell'], ['dark', 'Dunkel'], ['auto', 'Automatisch']].map(([k, label]) => ({
+      label, pick: () => this.toastMsg('Nur im Prototyp: über Tweaks umschalten'),
+      css: this.segCss((dark && k === 'dark') || (!dark && k === 'light'))
+    }));
+
+    const behaviour = [
+      ['Beim Start fortsetzen', 'Aktive Torrents automatisch starten'],
+      ['Benachrichtigungen', 'Wenn ein Download fertig ist'],
+      ['Nur im WLAN', 'Mobile Daten für Downloads sperren']
+    ].map(([k, d], i) => ({
+      k, d, switchCss: this.sw(s.behave[i]), knobCss: this.knob(),
+      toggle: () => this.setState(st => { const b = st.behave.slice(); b[i] = !b[i]; return { behave: b }; })
+    }));
+
+    const cats = ['radarr', 'tv-sonarr', 'prowlarr', 'Keine'].map(c => ({
+      label: c, pick: () => this.setState({ cat: c }),
+      checkCss: 'color:var(--ac,#C80815); display:flex; align-items:center; opacity:' + (s.cat === c ? '1' : '0') + ';'
+    }));
+
+    const delT = this.data.find(x => x.id === s.delId);
+
+    return {
+      rootRef: this.rootRef,
+      isList: s.screen === 'list', isSettings: s.screen === 'settings',
+      isDetail: s.screen === 'detail', isEmpty: list.length === 0,
+      torrents, cur, dtabs, appearance, behaviour, cats, filterOptions, sortOptions,
+      openSettings: () => this.setState({ screen: 'settings' }),
+      filterLabel: curFilter[1], filterCount: this.count(curFilter[0]),
+      filterCountCss: 'font-variant-numeric:tabular-nums; font-size:12px; font-weight:600; opacity:0.55;',
+      filterPillCss: pill(s.menu === 'filter'), sortPillCss: pill(s.menu === 'sort'),
+      dirBtnCss: 'width:32px; height:32px; flex:0 0 32px; border:none; border-radius:16px; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; color:' +
+        (dark ? '#fff' : 'var(--ac,#C80815)') + '; background:' + (dark ? 'var(--ac,#E0202C)' : 'var(--fill,rgba(118,118,128,0.12))') + ';',
+      sortLabel: ({ status: 'Status', name: 'Name', size: 'Größe', progress: 'Fortschritt' })[s.sort],
+      menuFilter: s.menu === 'filter', menuSort: s.menu === 'sort', menuOpen: !!s.menu,
+      toggleFilterMenu: () => this.setState(st => ({ menu: st.menu === 'filter' ? null : 'filter' })),
+      toggleSortMenu: () => this.setState(st => ({ menu: st.menu === 'sort' ? null : 'sort' })),
+      closeMenus: () => this.setState({ menu: null }),
+      toggleDir: () => this.setState(st => ({ dir: st.dir === 1 ? -1 : 1 })),
+      dirIconCss: 'transition:transform 0.22s cubic-bezier(0.32,0.72,0,1); transform:rotate(' + (s.dir === 1 ? '0' : '180') + 'deg);',
+      dInfo: s.dtab === 'info', dFiles: s.dtab === 'files', dTrackers: s.dtab === 'trackers',
+      q: s.q, onQuery: e => this.setState({ q: e.target.value }),
+      magnet: s.magnet, onMagnet: e => this.setState({ magnet: e.target.value }),
+      savePath: s.cat === 'tv-sonarr' ? '/downloads/tv' : '/downloads/movies',
+      listCaption: list.length + (list.length === 1 ? ' Torrent' : ' Torrents'),
+      totalDown: this.speed(this.sum('dl')), totalUp: this.speed(this.sum('up')),
+      dlLimit: '∞', upLimit: s.alt ? '2,5 MB/s' : '∞',
+      altSwitchCss: this.sw(s.alt), altKnobCss: this.knob(),
+      toggleAlt: () => this.setState(st => ({ alt: !st.alt })),
+      startSwitchCss: this.sw(s.startNow), startKnobCss: this.knob(),
+      toggleStart: () => this.setState(st => ({ startNow: !st.startNow })),
+      delSwitchCss: this.sw(s.delFiles), delKnobCss: this.knob(),
+      toggleDelFiles: () => this.setState(st => ({ delFiles: !st.delFiles })),
+      delName: delT ? delT.title : '',
+      openAdd: () => this.setState({ sheet: 'add' }),
+      closeSheet: () => this.setState({ sheet: null, delId: null }),
+      confirmAdd: () => { this.setState({ sheet: null }); this.toastMsg('Torrent hinzugefügt'); },
+      confirmDelete: () => {
+        this.data = this.data.filter(x => x.id !== s.delId);
+        this.setState({ sheet: null, delId: null, screen: s.screen === 'detail' ? 'list' : s.screen });
+        this.toastMsg(s.delFiles ? 'Torrent und Dateien gelöscht' : 'Torrent entfernt');
+      },
+      askDeleteCur: () => this.setState({ sheet: 'del', delId: s.sel }),
+      togglePauseCur: () => this.togglePause(s.sel),
+      back: () => this.setState({ screen: 'list', sel: null }),
+      toast: () => this.toastMsg('An Tracker gemeldet'),
+      sheetAdd: s.sheet === 'add', sheetDel: s.sheet === 'del',
+      hasToast: !!s.toastMsg, toastMsg: s.toastMsg
+    };
+  }
+}
+</script>
+</body>
+</html>
