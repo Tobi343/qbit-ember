@@ -49,7 +49,7 @@ Bei Push auf `main` (bzw. Tags `v*`) baut GitHub Actions ein Multi-Arch-Image
 ```yaml
 services:
   qbit-ember:
-    image: ghcr.io/<github-user>/qbit-ember:latest
+    image: ghcr.io/dragonmasta37070/qbit-ember:latest
     container_name: qbit-ember
     environment:
       - QBIT_API_URL=http://gluetun:8090
