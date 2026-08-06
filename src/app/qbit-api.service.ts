@@ -4,8 +4,8 @@ import { Injectable, computed, signal } from '@angular/core';
 export type UiState = 'downloading' | 'seeding' | 'completed' | 'queued' | 'stalled' | 'paused' | 'error';
 
 export const STATE_LABEL: Record<UiState, string> = {
-  downloading: 'Lädt', seeding: 'Verteilt', completed: 'Fertig',
-  queued: 'Wartet', stalled: 'Stockt', paused: 'Pausiert', error: 'Fehler',
+  downloading: 'Downloading', seeding: 'Seeding', completed: 'Complete',
+  queued: 'Queued', stalled: 'Stalled', paused: 'Paused', error: 'Error',
 };
 
 // token name of the state colour — resolved in CSS via var()
@@ -80,7 +80,7 @@ export class QbitApiService {
   readonly catPaths = signal<Record<string, string>>({});
   readonly defaultSavePath = signal('');
   readonly altLimits = signal(false);
-  readonly dlLimit = signal(0);   // bytes/s, 0 = unbegrenzt
+  readonly dlLimit = signal(0);   // bytes/s, 0 = unlimited
   readonly upLimit = signal(0);
   readonly connected = computed(() => this.auth() === 'ok');
 
@@ -203,7 +203,7 @@ export class QbitApiService {
       this.auth.set('ok');
       this.start();
     } else {
-      this.loginError.set('Anmeldung fehlgeschlagen');
+      this.loginError.set('Sign-in failed');
     }
     return ok;
   }
@@ -238,16 +238,16 @@ export class QbitApiService {
     this.torrents.update(list => list.filter(t => t.hash !== hash));
   }
 
-  // torrents/add verlangt multipart/form-data — urlencoded wird still verworfen
+  // torrents/add requires multipart/form-data — urlencoded is silently dropped
   async add(magnet: string, category: string, startNow: boolean): Promise<boolean> {
     const fd = new FormData();
     fd.append('urls', magnet);
     if (category) fd.append('category', category);
     fd.append('stopped', String(!startNow));
-    fd.append('paused', String(!startNow)); // pre-5.x name, von 5.x ignoriert
+    fd.append('paused', String(!startNow)); // pre-5.x name, ignored by 5.x
     const r = await fetch('/api/v2/torrents/add', { method: 'POST', body: fd });
     if (!r.ok) return false;
-    this.rid = 0; // nächster Poll liefert ein full_update mit dem neuen Torrent
+    this.rid = 0; // next poll returns a full_update containing the new torrent
     return !(await r.text()).startsWith('Fails');
   }
 

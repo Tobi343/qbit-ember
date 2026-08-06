@@ -7,11 +7,11 @@ type Sort = 'status' | 'name' | 'size' | 'progress';
 export type Theme = 'light' | 'dark' | 'auto';
 
 const FILTER_LABEL: Record<Filter, string> = {
-  active: 'Aktiv', all: 'Alle', down: 'Lädt', done: 'Fertig', paused: 'Wartet',
-  seeding: 'Verteilt', completed: 'Fertig', stalled: 'Stockt', error: 'Fehler',
+  active: 'Active', all: 'All', down: 'Downloading', done: 'Complete', paused: 'Queued',
+  seeding: 'Seeding', completed: 'Complete', stalled: 'Stalled', error: 'Error',
 };
 const SORT_LABEL: Record<Sort, string> = {
-  status: 'Status', name: 'Name', size: 'Größe', progress: 'Fortschritt',
+  status: 'Status', name: 'Name', size: 'Size', progress: 'Progress',
 };
 
 const FILTER_FN: Record<Filter, (t: Torrent) => boolean> = {
@@ -40,8 +40,8 @@ const STATE_RANK: Record<UiState, number> = {
 const RING_C = 87.96; // 2π·14 — 34px ring, 3px stroke (design/README.md)
 const NO_CAT = '__none__';
 const NO_TAG = '__none__';
-const PUSH_MS = 300;  // Push-Screen-Animation (design motion table)
-const SHEET_MS = 340; // Sheet up/down
+const PUSH_MS = 300;  // push-screen animation (design motion table)
+const SHEET_MS = 340; // sheet up/down
 
 interface Behave { resume: boolean; notify: boolean; wifi: boolean; }
 
@@ -68,9 +68,9 @@ export class AppComponent {
   readonly sideFilters: Filter[] = ['all', 'down', 'seeding', 'completed', 'paused', 'stalled', 'error'];
   readonly sorts: Sort[] = ['status', 'name', 'size', 'progress'];
   readonly themes: Theme[] = ['light', 'dark', 'auto'];
-  readonly THEME_LABEL: Record<Theme, string> = { light: 'Hell', dark: 'Dunkel', auto: 'Automatisch' };
+  readonly THEME_LABEL: Record<Theme, string> = { light: 'Light', dark: 'Dark', auto: 'Automatic' };
   readonly dtabs = ['info', 'files', 'trackers'] as const;
-  readonly DTAB_LABEL = { info: 'Info', files: 'Dateien', trackers: 'Tracker' };
+  readonly DTAB_LABEL = { info: 'Info', files: 'Files', trackers: 'Trackers' };
   readonly fmtBytes = fmtBytes;
   readonly fmtSpeed = fmtSpeed;
   readonly fmtRatio = fmtRatio;
@@ -98,7 +98,7 @@ export class AppComponent {
   readonly delTarget = signal<Torrent | null>(null);
   readonly delFiles = signal(false);
   readonly magnet = signal('');
-  readonly addCat = signal('');                // '' = Keine
+  readonly addCat = signal('');                // '' = none
   readonly startNow = signal(true);
   readonly open = signal<string | null>(null); // swipe-open row hash
   readonly dragX = signal(0);                  // live drag offset of drag target
@@ -106,7 +106,7 @@ export class AppComponent {
   readonly toastMsg = signal('');
   readonly theme = signal<Theme>((localStorage.getItem('theme') as Theme) ?? 'auto');
   readonly isDesktop = signal(matchMedia('(min-width: 900px)').matches);
-  // ponytail: die drei Verhalten-Switches sind reine UI-Präferenzen, nur localStorage
+  // ponytail: the three behaviour switches are pure UI preferences, localStorage only
   readonly behave = signal<Behave>(JSON.parse(localStorage.getItem('behave') ?? '{"resume":true,"notify":false,"wifi":false}'));
 
   readonly files = signal<TorrentFile[]>([]);
@@ -162,10 +162,10 @@ export class AppComponent {
     if (q) list = list.filter(t => t.name.toLowerCase().includes(q) || t.category.toLowerCase().includes(q));
     const s = this.sort();
     list = [...list].sort((a, b) =>
-      s === 'name' ? a.name.localeCompare(b.name, 'de')
+      s === 'name' ? a.name.localeCompare(b.name, 'en')
       : s === 'size' ? b.size - a.size
       : s === 'progress' ? b.progress - a.progress
-      : STATE_RANK[a.state] - STATE_RANK[b.state] || a.name.localeCompare(b.name, 'de'));
+      : STATE_RANK[a.state] - STATE_RANK[b.state] || a.name.localeCompare(b.name, 'en'));
     return this.dir() === -1 ? list.reverse() : list;
   });
 
@@ -211,7 +211,7 @@ export class AppComponent {
 
   techLine(t: Torrent): string { return techLine(t.name, t.size, t.category); }
 
-  pct(t: Torrent): string { return `${Math.round(t.progress * 100)} %`; }
+  pct(t: Torrent): string { return `${Math.round(t.progress * 100)}%`; }
 
   shortTitle(t: Torrent): string {
     const clean = t.name.replace(/[._]/g, ' ');
@@ -228,14 +228,16 @@ export class AppComponent {
 
   statusDetail(t: Torrent): string {
     switch (t.state) {
+      // ponytail: no percentage here — the progress ring next to it already shows it,
+      // and the English labels are long enough to truncate the line on a narrow phone
       case 'downloading':
-        return `${Math.round(t.progress * 100)} % · ↓ ${fmtSpeed(t.dlspeed)} · noch ${fmtEta(t.eta)}`;
-      case 'seeding': return `↑ ${fmtSpeed(t.upspeed)} · ${t.peers} Peers`;
-      case 'completed': return `Verhältnis ${fmtRatio(t.ratio)}`;
-      case 'queued': return 'In Warteschlange';
-      case 'stalled': return 'Keine Verbindung zu Peers';
-      case 'paused': return `${fmtBytes(t.completed)} geladen`;
-      case 'error': return 'Fehler';
+        return `↓ ${fmtSpeed(t.dlspeed)} · ETA ${fmtEta(t.eta)}`;
+      case 'seeding': return `↑ ${fmtSpeed(t.upspeed)} · ${t.peers} peers`;
+      case 'completed': return `Ratio ${fmtRatio(t.ratio)}`;
+      case 'queued': return 'In queue';
+      case 'stalled': return 'No connection to peers';
+      case 'paused': return `${fmtBytes(t.completed)} downloaded`;
+      case 'error': return 'Error';
     }
   }
 
@@ -323,25 +325,25 @@ export class AppComponent {
     this.open.set(null);
     if (t.state === 'paused') {
       await this.api.resume(t.hash);
-      this.toast('Fortgesetzt');
+      this.toast('Resumed');
     } else {
       await this.api.pause(t.hash);
-      this.toast('Pausiert');
+      this.toast('Paused');
     }
   }
 
   async reannounce(t: Torrent): Promise<void> {
     await this.api.reannounce(t.hash);
-    this.toast('Neu gemeldet');
+    this.toast('Reannounced');
   }
 
   async share(t: Torrent): Promise<void> {
     const link = t.magnetUri || t.name;
     if (navigator.share) {
-      try { await navigator.share({ title: t.name, url: t.magnetUri || undefined, text: t.magnetUri ? undefined : t.name }); } catch { /* abgebrochen */ }
+      try { await navigator.share({ title: t.name, url: t.magnetUri || undefined, text: t.magnetUri ? undefined : t.name }); } catch { /* cancelled */ }
     } else {
       await navigator.clipboard.writeText(link);
-      this.toast('Link kopiert');
+      this.toast('Link copied');
     }
   }
 
@@ -361,7 +363,7 @@ export class AppComponent {
     this.delTarget.set(null);
     if (this.sel() === t.hash) this.sel.set(null);
     if (this.screen() === 'detail') this.back();
-    this.toast(withFiles ? 'Torrent und Dateien gelöscht' : 'Torrent entfernt');
+    this.toast(withFiles ? 'Torrent and files deleted' : 'Torrent removed');
   }
 
   // ── Add sheet (design §4) ────────────────────────────────
@@ -385,7 +387,7 @@ export class AppComponent {
     }, SHEET_MS);
   }
 
-  // ── Sheet nach unten wischen zum Schließen ───────────────
+  // ── Swipe the sheet down to dismiss ──────────────────────
   private sheetStartY = 0;
 
   onSheetDown(ev: PointerEvent): void {
@@ -409,12 +411,12 @@ export class AppComponent {
   async confirmAdd(): Promise<void> {
     const magnet = this.magnet().trim();
     if (!magnet) {
-      this.toast('Magnet-Link fehlt');
+      this.toast('Magnet link missing');
       return;
     }
     const ok = await this.api.add(magnet, this.addCat(), this.startNow());
     this.closeSheet();
-    this.toast(ok ? 'Torrent hinzugefügt' : 'Hinzufügen fehlgeschlagen');
+    this.toast(ok ? 'Torrent added' : 'Adding failed');
   }
 
   toggleBehave(key: keyof Behave): void {

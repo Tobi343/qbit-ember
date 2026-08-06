@@ -1,82 +1,80 @@
-# Implementierungs-Auftrag: qbit-ember
+# Implementation brief: qbit-ember
 
-Du baust **qbit-ember**, eine eigenständige, mobile-first Web-UI für qBittorrent (ersetzt die
-hässliche Standard-WebUI). Das komplette High-Fidelity-Design ist bereits fertig und liegt in
-diesem Repo unter `design/` – lies **`design/README.md`** und **`design/uploads/STYLE_GUIDE.md`**
-vollständig, bevor du irgendetwas implementierst. Jede Zahl darin (Farben, Radien, Abstände,
-Timing, Copy) ist verbindlich, nicht nur Anhaltspunkt.
+You are building **qbit-ember**, a standalone, mobile-first web UI for qBittorrent (replacing the
+ugly stock WebUI). The complete high-fidelity design already exists and lives in this repo under
+`design/` — read **`design/README.md`** and **`design/uploads/STYLE_GUIDE.md`** in full before
+implementing anything. Every number in there (colours, radii, spacing, timing, copy) is binding,
+not just a hint.
 
-Die Dateien `design/qbit WebUI.dc.html` und `design/qbitPhone.dc.html` sind interaktive
-Prototypen aus einem Design-Tool und laufen über eine proprietäre Runtime (`design/support.js`).
-**Das ist kein Code zum Übernehmen.** Nutze sie nur, um das Verhalten/Layout visuell
-nachzuvollziehen – portiere nicht das Markup, sondern baue die Screens sauber im Zielstack neu.
+The files `design/qbit WebUI.dc.html` and `design/qbitPhone.dc.html` are interactive prototypes
+from a design tool and run on a proprietary runtime (`design/support.js`).
+**That is not code to adopt.** Use them only to understand the behaviour/layout visually — do not
+port the markup, rebuild the screens cleanly in the target stack.
 
-## Produkt
+## Product
 
-Reines Frontend, kein eigenes Backend, keine Datenbank, kein User-Auth-System (Login läuft 1:1
-über die qBittorrent-Zugangsdaten). Die App kommuniziert ausschließlich mit der offiziellen
-qBittorrent WebUI API v2 (`/api/v2/...`), primär über `sync/maindata` für effizientes
-Delta-Polling. Der volle Funktionsumfang, alle Screens, das API-Mapping und der State sind in
-`design/README.md` (Abschnitte "Screens", "API", "State") bereits exakt spezifiziert – setze das
-1:1 um.
+Pure frontend, no backend of its own, no database, no user auth system (login goes 1:1 through the
+qBittorrent credentials). The app talks exclusively to the official qBittorrent WebUI API v2
+(`/api/v2/...`), primarily via `sync/maindata` for efficient delta polling. The full feature set,
+all screens, the API mapping and the state are already specified exactly in `design/README.md`
+(sections "Screens", "API", "State") — implement that 1:1.
 
-Einziger Nutzer bin ich, kein Multi-Tenant, keine Rollen/Rechte.
+I am the only user, no multi-tenancy, no roles/permissions.
 
-## Stack (verbindlich)
+## Stack (binding)
 
-- **Angular, standalone components**, TypeScript strict. Das ist der Stack, für den
-  `STYLE_GUIDE.md` geschrieben ist (§10) und der zu meinen anderen Apps passt – kein React/Vue.
-- Design-Tokens als CSS Custom Properties exakt aus `STYLE_GUIDE.md` §3 übernehmen, keine
-  eigenen Farben/Radien/Fonts erfinden.
-- Font Awesome 6 Free (solid) über CDN, einfarbig via `currentColor`, wie in §6 beschrieben.
-- Kein State-Management-Framework nötig – ein schlanker `QbitApiService` (RxJS oder Signals) für
-  Login/Session-Cookie und das Polling von `sync/maindata` reicht.
-- PWA via `@angular/pwa`: `manifest.json` (Name, Icons, `display: standalone`, `theme-color` aus
-  den Design-Tokens), Safe-Area-Insets für iPhone (Notch/Home-Indicator) berücksichtigen. Der
-  Service Worker cached nur statische Assets, **niemals** API-Responses.
-- Für lokale Entwicklung: Angular Dev-Proxy (`proxy.conf.json`) auf eine echte qBittorrent-Instanz
-  zeigen lassen, damit `ng serve` ohne CORS-Probleme läuft (Same-Origin-Trick wie im Prod-Setup).
+- **Angular, standalone components**, TypeScript strict. That is the stack `STYLE_GUIDE.md` was
+  written for (§10) and the one that matches my other apps — no React/Vue.
+- Take the design tokens as CSS custom properties exactly from `STYLE_GUIDE.md` §3, do not invent
+  your own colours/radii/fonts.
+- Font Awesome 6 Free (solid) via CDN, single-colour via `currentColor`, as described in §6.
+- No state-management framework needed — a lean `QbitApiService` (RxJS or signals) for
+  login/session cookie and the `sync/maindata` polling is enough.
+- PWA via `@angular/pwa`: `manifest.json` (name, icons, `display: standalone`, `theme-color` from
+  the design tokens), respect safe-area insets for iPhone (notch/home indicator). The service
+  worker caches static assets only, **never** API responses.
+- For local development: point the Angular dev proxy (`proxy.conf.json`) at a real qBittorrent
+  instance so `ng serve` runs without CORS problems (same-origin trick as in the prod setup).
 
-## Deployment / Docker (wichtig für die Komodo-Einbindung)
+## Deployment / Docker (important for the Komodo integration)
 
-Ziel: **ein einziger, in sich geschlossener Container**, der genauso funktioniert wie das bereits
-im Homelab laufende `iQbit` – Static Build + eingebauter Reverse-Proxy zur qBittorrent-API, damit
-kein CORS-Setup und keine manuelle Split-Konfiguration im vorgelagerten Reverse-Proxy nötig ist.
+Goal: **a single, self-contained container** that works just like the `iQbit` already running in
+my homelab — static build plus a built-in reverse proxy to the qBittorrent API, so no CORS setup
+and no manual split configuration in the upstream reverse proxy is needed.
 
-- **Multi-Stage Dockerfile**: Node-Stage baut `ng build --configuration production`, Runtime-Stage
-  ist `nginx:alpine` und liefert `dist/`.
-- **nginx.conf im Image** übernimmt zwei Aufgaben:
-  1. Angular-App ausliefern mit Fallback auf `index.html` (Client-Side-Routing).
-  2. `/api/v2/` (inkl. Cookies) auf ein per Umgebungsvariable konfigurierbares Backend
-     reverse-proxyen, z. B. `QBIT_API_URL` (Default `http://gluetun:8090`, da qBittorrent bei mir
-     hinter Gluetun/VPN im selben Docker-Netzwerk läuft und dessen Netzwerk-Namespace teilt).
-     Umsetzung via `envsubst` auf ein `nginx.conf.template` beim Container-Start (Standardmuster
-     des offiziellen nginx-Images).
-- **Zielplattform ist ein Raspberry Pi (arm64)**. Baue das Image daher **nicht** auf dem Pi selbst
-  (das hat in der Vergangenheit an DNS/Buildx-Problemen gehakt), sondern über eine
-  **GitHub-Actions-Workflow**, die bei Push auf `main` bzw. bei Tags ein Multi-Arch-Image
-  (mind. `linux/arm64`, gerne zusätzlich `linux/amd64`) baut und nach **GHCR** pusht
-  (`ghcr.io/<github-user>/qbit-ember`). Komodo zieht dann nur noch ein fertiges Image, statt es
-  vor Ort zu bauen.
-- Liefere eine Beispiel-`docker-compose.yml` (bzw. Snippet) im README, die zu meinem bestehenden
-  Stack passt: eigener Service, `QBIT_API_URL=http://gluetun:8090`, im selben Docker-Netzwerk wie
-  `gluetun`, kein Port-Publish nötig, falls über einen vorgelagerten Reverse-Proxy (nginx) auf
-  einer eigenen Subdomain erreichbar gemacht wird.
+- **Multi-stage Dockerfile**: a Node stage builds `ng build --configuration production`, the
+  runtime stage is `nginx:alpine` and serves `dist/`.
+- **nginx.conf inside the image** does two jobs:
+  1. Serve the Angular app with a fallback to `index.html` (client-side routing).
+  2. Reverse-proxy `/api/v2/` (including cookies) to a backend configurable via an environment
+     variable, e.g. `QBIT_API_URL` (default `http://gluetun:8090`, since my qBittorrent runs behind
+     Gluetun/VPN in the same Docker network and shares its network namespace).
+     Implement it via `envsubst` on an `nginx.conf.template` at container start (the standard
+     pattern of the official nginx image).
+- **The target platform is a Raspberry Pi (arm64).** So do **not** build the image on the Pi itself
+  (that has stalled on DNS/buildx problems in the past), but via a **GitHub Actions workflow** that
+  builds a multi-arch image (at least `linux/arm64`, ideally `linux/amd64` too) on push to `main`
+  or on tags and pushes it to **GHCR** (`ghcr.io/<github-user>/qbit-ember`). Komodo then only pulls
+  a finished image instead of building it on site.
+- Provide an example `docker-compose.yml` (or snippet) in the README that fits my existing stack:
+  its own service, `QBIT_API_URL=http://gluetun:8090`, in the same Docker network as `gluetun`, no
+  port publishing needed if it is exposed on its own subdomain through an upstream reverse proxy
+  (nginx).
 
 ## Repo
 
-- Öffentliches GitHub-Repo, Name `qbit-ember` (gerne anpassen falls es schon vergeben ist).
-- Lizenz: MIT.
-- Sinnvolle `.gitignore` (Angular/Node-Standard, `dist/`, `node_modules/`).
-- README mit: Kurzbeschreibung, Screenshot(s)/GIF sobald vorhanden, lokalem Dev-Setup
-  (`proxy.conf.json`), Build-Anleitung, Docker-Compose-Beispiel, Hinweis auf `design/` als
-  Referenz für das Designsystem.
-- `design/`-Ordner aus diesem Handoff unverändert ins Repo übernehmen (dient als lebende
-  Referenzdokumentation für Farben/Komponenten/Screens, auch für spätere Änderungen).
+- Public GitHub repo, named `qbit-ember` (feel free to adjust if taken).
+- Licence: MIT.
+- Sensible `.gitignore` (Angular/Node standard, `dist/`, `node_modules/`).
+- README with: short description, screenshot(s)/GIF once available, local dev setup
+  (`proxy.conf.json`), build instructions, docker-compose example, a pointer to `design/` as the
+  reference for the design system.
+- Take the `design/` folder from this handoff into the repo unchanged (it serves as living
+  reference documentation for colours/components/screens, including for later changes).
 
-## Vorgehen
+## Approach
 
-Wie in `STYLE_GUIDE.md` §13 beschrieben: erst alle Screens mit ihren drei Zonen (Header / Content
-/ FAB) und der jeweiligen Primäraktion auflisten, dann **Screen für Screen** bauen und vor dem
-nächsten Screen kurz Rückmeldung einholen. Vor jedem "fertig" die Checkliste aus §11 durchgehen
-(Tokens statt Hex-Werten, 44px Tap-Targets, Motion nur aus der 3-Werte-Skala, etc.).
+As described in `STYLE_GUIDE.md` §13: first list all screens with their three zones (header /
+content / FAB) and their respective primary action, then build **screen by screen**, checking back
+briefly before moving on to the next one. Before every "done", walk through the checklist in §11
+(tokens instead of hex values, 44px tap targets, motion only from the 3-value scale, etc.).

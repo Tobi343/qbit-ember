@@ -1,5 +1,5 @@
-// Einweg-Mock der qBittorrent-API + Static-Server für die README-Screenshots.
-// Demo-Daten aus design/README.md, damit keine echten Torrents im Repo landen.
+// Throwaway mock of the qBittorrent API + static server for the README screenshots.
+// Demo data, so no real torrents end up in the repo.
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
@@ -72,7 +72,7 @@ createServer(async (req, res) => {
   if (p === '/api/v2/torrents/trackers') return json(TRACKERS);
   if (p.startsWith('/api/')) return text('Ok.');
 
-  // statisch aus dist/, sonst index.html (SPA-Fallback)
+  // static from dist/, else index.html (SPA fallback)
   let file = join(DIST, p === '/' ? 'index.html' : p);
   try {
     const body = await readFile(file);
@@ -82,4 +82,4 @@ createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(await readFile(join(DIST, 'index.html')));
   }
-}).listen(PORT, () => console.log('mock auf ' + PORT));
+}).listen(PORT, () => console.log('mock on ' + PORT));

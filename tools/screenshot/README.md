@@ -1,8 +1,8 @@
-# Screenshots neu erzeugen
+# Regenerating the screenshots
 
-Fotografiert die App mit Demo-Daten statt mit einer echten qBittorrent-Instanz —
-so landen keine realen Torrentnamen oder Serveradressen im öffentlichen Repo.
-Braucht nur Node und ein installiertes Google Chrome, keine npm-Abhängigkeiten.
+Shoots the app against demo data instead of a real qBittorrent instance, so no real torrent
+names or server addresses end up in the public repo. Needs only Node and an installed Google
+Chrome — no npm dependencies.
 
 ```bash
 ng build

@@ -1,13 +1,13 @@
-# qbit-ember (Vorbereitung)
+# qbit-ember (preparation)
 
-Dieser Ordner ist die Vorbereitung für ein eigenständiges, öffentliches GitHub-Repo (`qbit-ember`)
-– eine selbst gebaute, mobile-first Web-UI für qBittorrent. Der eigentliche Code entsteht in einem
-separaten Repo/Session mit Claude Code; hier liegen nur Design-Handoff und Implementierungs-Prompt.
+This folder was the preparation for a standalone, public GitHub repo (`qbit-ember`) — a hand-built,
+mobile-first web UI for qBittorrent. The actual code was written in a separate repo/session with
+Claude Code; this folder only held the design handoff and the implementation prompt.
 
-- `design/` – High-Fidelity-Designhandoff (Screens, Tokens, "Modern Dark + Red" Style Guide,
-  interaktive Prototypen). Siehe `design/README.md`.
-- `docs/design-brief.md` – der ursprüngliche Prompt, mit dem das Design erstellt wurde.
-- `docs/implementation-prompt.md` – der Prompt für Claude Code, um daraus das Angular-Repo +
-  Docker-Deployment zu bauen.
+- `design/` — high-fidelity design handoff (screens, tokens, "Modern Dark + Red" style guide,
+  interactive prototypes). See `design/README.md`.
+- `docs/design-brief.md` — the original prompt the design was created from.
+- `docs/implementation-prompt.md` — the prompt for Claude Code to build the Angular repo +
+  Docker deployment from it.
 
-Sobald das Repo existiert, kann dieser Ordner hier archiviert oder entfernt werden.
+Kept as a record of how the project started; the repo it describes is this one.

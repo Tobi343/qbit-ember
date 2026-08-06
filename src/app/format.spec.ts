@@ -1,23 +1,23 @@
-// ponytail: kleiner Selbstcheck für die deutschen Format-Helfer, kein Framework-Overhead
+// ponytail: small self-check for the formatters, no framework overhead
 import { fmtBytes, fmtEta, fmtRatio, fmtSpeed } from './format';
 
 describe('format', () => {
-  it('formatiert Bytes mit deutschem Komma', () => {
-    expect(fmtBytes(38214204129)).toBe('35,6 GB');
-    expect(fmtBytes(1363512524341)).toBe('1,24 TB');
+  it('formats bytes', () => {
+    expect(fmtBytes(38214204129)).toBe('35.6 GB');
+    expect(fmtBytes(1363512524341)).toBe('1.24 TB');
     expect(fmtBytes(0)).toBe('0 B');
   });
-  it('formatiert Geschwindigkeit', () => {
-    expect(fmtSpeed(86630)).toBe('84,6 KB/s');
+  it('formats speed', () => {
+    expect(fmtSpeed(86630)).toBe('84.6 KB/s');
     expect(fmtSpeed(0)).toBe('0 KB/s');
-    expect(fmtSpeed(2621440)).toBe('2,5 MB/s');
+    expect(fmtSpeed(2621440)).toBe('2.5 MB/s');
   });
-  it('formatiert ETA', () => {
-    expect(fmtEta(374400)).toBe('4 T 8 Std');
+  it('formats ETA', () => {
+    expect(fmtEta(374400)).toBe('4d 8h');
     expect(fmtEta(8640000)).toBe('∞');
-    expect(fmtEta(300)).toBe('5 Min');
+    expect(fmtEta(300)).toBe('5m');
   });
-  it('formatiert Verhältnis', () => {
-    expect(fmtRatio(0.55)).toBe('0,55');
+  it('formats ratio', () => {
+    expect(fmtRatio(0.55)).toBe('0.55');
   });
 });

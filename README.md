@@ -9,13 +9,11 @@ Pure frontend: no backend of its own, no database. The app talks only to the off
 (`/api/v2/...`), mainly `sync/maindata` for delta polling on a 1.1s interval. Login goes
 straight through your qBittorrent credentials.
 
-> **Note:** the interface copy is German, as specified in the design handoff.
-
 ![Desktop layout](docs/screenshots/desktop.png)
 
 | List | Detail | Add | Settings |
 |---|---|---|---|
-| ![Torrent list](docs/screenshots/mobile-liste.png) | ![Torrent detail](docs/screenshots/mobile-detail.png) | ![Add torrent](docs/screenshots/mobile-hinzufuegen.png) | ![Settings](docs/screenshots/mobile-einstellungen.png) |
+| ![Torrent list](docs/screenshots/mobile-list.png) | ![Torrent detail](docs/screenshots/mobile-detail.png) | ![Add torrent](docs/screenshots/mobile-add.png) | ![Settings](docs/screenshots/mobile-settings.png) |
 
 <sub>Screenshots use demo data (`tools/screenshot/`), not a real library.</sub>
 

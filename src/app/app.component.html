@@ -1,5 +1,5 @@
 @if (!isDesktop()) {
-<!-- ── Screen 1: Torrent-Liste, Phone (design/README.md §1) ── -->
+<!-- ── Screen 1: torrent list, phone (design/README.md §1) ── -->
 <div class="screen list-screen">
   <header class="list-head">
     <div class="head-row">
@@ -8,10 +8,10 @@
         <h1>Torrents</h1>
       </div>
       <div class="head-actions">
-        <button class="circle circle--gear" aria-label="Einstellungen" (click)="pushScreen('settings')">
+        <button class="circle circle--gear" aria-label="Settings" (click)="pushScreen('settings')">
           <i class="fa-solid fa-gear"></i>
         </button>
-        <button class="circle circle--add" aria-label="Torrent hinzufügen" (click)="openAdd()">
+        <button class="circle circle--add" aria-label="Add torrent" (click)="openAdd()">
           <i class="fa-solid fa-plus"></i>
         </button>
       </div>
@@ -21,7 +21,7 @@
       <i class="fa-solid fa-magnifying-glass"></i>
       <input
         type="search"
-        placeholder="Torrents durchsuchen"
+        placeholder="Search torrents"
         [value]="q()"
         (input)="q.set($any($event.target).value)"
       />
@@ -41,7 +41,7 @@
         </div>
       </div>
       <div class="speed-col">
-        <div class="speed-label">Frei</div>
+        <div class="speed-label">Free</div>
         <div class="speed-value">{{ fmtBytes(api.server().freeSpace) }}</div>
       </div>
     </div>
@@ -59,10 +59,10 @@
       {{ SORT_LABEL[sort()] }}
       <i class="fa-solid fa-chevron-down chev"></i>
     </button>
-    <button class="dir-btn" [class.is-asc]="dir() === -1" (click)="flipDir()" aria-label="Sortierrichtung">
+    <button class="dir-btn" [class.is-asc]="dir() === -1" (click)="flipDir()" aria-label="Sort direction">
       <i class="fa-solid fa-arrow-down"></i>
     </button>
-    <div class="result-count">{{ visible().length }} Torrents</div>
+    <div class="result-count">{{ visible().length }} torrents</div>
   </div>
 
   @if (menu() === 'filter' || menu() === 'sort') {
@@ -91,8 +91,8 @@
     @if (visible().length === 0) {
       <div class="list-group">
         <div class="empty">
-          <div class="empty-title">Keine Treffer</div>
-          <div class="empty-sub">Passe Suche oder Filter an.</div>
+          <div class="empty-title">No matches</div>
+          <div class="empty-sub">Adjust your search or filter.</div>
         </div>
       </div>
     } @else {
@@ -106,7 +106,7 @@
               </button>
               <button class="swipe-btn swipe-btn--delete" (click)="askDelete(t)">
                 <i class="fa-solid fa-trash"></i>
-                <span>Löschen</span>
+                <span>Delete</span>
               </button>
             </div>
             <div
@@ -146,7 +146,7 @@
   </main>
 </div>
 
-<!-- ── Screen 2: Torrent-Detail (design/README.md §2) ── -->
+<!-- ── Screen 2: torrent detail (design/README.md §2) ── -->
 @if (screen() === 'detail' && detailTorrent(); as t) {
   <div class="push-screen" [class.is-closing]="closing()">
     <nav class="navbar">
@@ -154,7 +154,7 @@
         <i class="fa-solid fa-chevron-left"></i> Torrents
       </button>
       <div class="nav-title">{{ shortTitle(t) }}</div>
-      <button class="nav-more" aria-label="Optionen" (click)="askDelete(t)">
+      <button class="nav-more" aria-label="Options" (click)="askDelete(t)">
         <i class="fa-solid fa-ellipsis-vertical"></i>
       </button>
     </nav>
@@ -168,7 +168,7 @@
       <div class="progress-card">
         <div class="pc-top">
           <span class="pc-pct" [style.color]="'var(' + STATE_COLOR[t.state] + ')'">{{ pct(t) }}</span>
-          <span class="pc-of">{{ fmtBytes(t.completed) }} von {{ fmtBytes(t.size) }}</span>
+          <span class="pc-of">{{ fmtBytes(t.completed) }} of {{ fmtBytes(t.size) }}</span>
         </div>
         <div class="pc-track">
           <div class="pc-fill" [style.width.%]="t.progress * 100" [style.background]="'var(' + STATE_COLOR[t.state] + ')'"></div>
@@ -183,7 +183,7 @@
             <div class="pc-value" style="color: var(--ok)">{{ fmtSpeed(t.upspeed) }}</div>
           </div>
           <div>
-            <div class="pc-label">Rest</div>
+            <div class="pc-label">Remaining</div>
             <div class="pc-value">{{ fmtBytes(t.size - t.completed) }}</div>
           </div>
         </div>
@@ -192,16 +192,16 @@
       <div class="action-row">
         <button class="action-card" (click)="togglePause(t)">
           <i class="fa-solid" [class]="t.state === 'paused' ? 'fa-play' : 'fa-pause'"></i>
-          {{ t.state === 'paused' ? 'Starten' : 'Pausieren' }}
+          {{ t.state === 'paused' ? 'Start' : 'Pause' }}
         </button>
         <button class="action-card" (click)="reannounce(t)">
-          <i class="fa-solid fa-tower-broadcast"></i> Neu melden
+          <i class="fa-solid fa-tower-broadcast"></i> Reannounce
         </button>
         <button class="action-card" (click)="share(t)">
-          <i class="fa-solid fa-arrow-up-from-bracket"></i> Teilen
+          <i class="fa-solid fa-arrow-up-from-bracket"></i> Share
         </button>
         <button class="action-card action-card--bad" (click)="askDelete(t)">
-          <i class="fa-solid fa-trash"></i> Löschen
+          <i class="fa-solid fa-trash"></i> Delete
         </button>
       </div>
 
@@ -214,12 +214,12 @@
       @if (dtab() === 'info') {
         <div class="info-card">
           <div class="info-row"><span>Status</span><span [style.color]="'var(' + STATE_COLOR[t.state] + ')'">{{ STATE_LABEL[t.state] }}</span></div>
-          <div class="info-row"><span>Kategorie</span><span>{{ t.category || '–' }}</span></div>
-          <div class="info-row"><span>Verhältnis</span><span>{{ fmtRatio(t.ratio) }}</span></div>
+          <div class="info-row"><span>Category</span><span>{{ t.category || '–' }}</span></div>
+          <div class="info-row"><span>Ratio</span><span>{{ fmtRatio(t.ratio) }}</span></div>
           <div class="info-row"><span>Seeds</span><span>{{ t.seeds }}</span></div>
           <div class="info-row"><span>Peers</span><span>{{ t.peers }}</span></div>
-          <div class="info-row"><span>Hinzugefügt</span><span>{{ fmtDate(t.addedOn) }}</span></div>
-          <div class="info-row"><span>Speicherpfad</span><span class="info-mono">{{ t.savePath }}</span></div>
+          <div class="info-row"><span>Added</span><span>{{ fmtDate(t.addedOn) }}</span></div>
+          <div class="info-row"><span>Save path</span><span class="info-mono">{{ t.savePath }}</span></div>
           <div class="info-row"><span>Hash</span><span class="info-mono">{{ t.hash }}</span></div>
         </div>
       } @else if (dtab() === 'files') {
@@ -236,7 +236,7 @@
               </div>
             </div>
           } @empty {
-            <div class="empty"><div class="empty-sub">Lade Dateien …</div></div>
+            <div class="empty"><div class="empty-sub">Loading files …</div></div>
           }
         </div>
       } @else {
@@ -246,11 +246,11 @@
               <span class="tracker-dot" [style.background]="tr.status === 2 ? 'var(--ok)' : tr.status === 4 ? 'var(--bad)' : 'var(--t3)'"></span>
               <div class="tracker-text">
                 <div class="tracker-url">{{ tr.url }}</div>
-                <div class="tracker-sub">{{ tr.status === 2 ? 'Aktiv' : tr.status === 4 ? 'Nicht erreichbar' : 'Nicht kontaktiert' }} · {{ tr.peers }} Peers</div>
+                <div class="tracker-sub">{{ tr.status === 2 ? 'Working' : tr.status === 4 ? 'Unreachable' : 'Not contacted' }} · {{ tr.peers }} peers</div>
               </div>
             </div>
           } @empty {
-            <div class="empty"><div class="empty-sub">Lade Tracker …</div></div>
+            <div class="empty"><div class="empty-sub">Loading trackers …</div></div>
           }
         </div>
       }
@@ -259,13 +259,13 @@
 }
 
 } @else {
-<!-- ── Screen 7: Desktop (design/README.md §7) ── -->
+<!-- ── Screen 7: desktop (design/README.md §7) ── -->
 <div class="desktop">
   <aside class="sidebar">
     <div class="sidebar-search">
       <i class="fa-solid fa-magnifying-glass"></i>
       <input
-        placeholder="Filtern"
+        placeholder="Filter"
         [value]="q()"
         (input)="q.set($any($event.target).value)"
       />
@@ -279,7 +279,7 @@
           <span class="side-count">{{ counts()[f] }}</span>
         </button>
       }
-      <div class="side-caption">Kategorien</div>
+      <div class="side-caption">Categories</div>
       @for (c of catCounts().cats; track c[0]) {
         <button class="side-item" [class.is-active]="catFilter() === c[0]" (click)="pickCat(c[0])">
           <span class="dot" style="background: var(--t3)"></span>
@@ -289,13 +289,13 @@
       }
       <button class="side-item" [class.is-active]="catFilter() === NO_CAT" (click)="pickCat(NO_CAT)">
         <span class="dot" style="background: var(--t3)"></span>
-        <span class="side-label">Ohne Kategorie</span>
+        <span class="side-label">Uncategorized</span>
         <span class="side-count">{{ catCounts().none }}</span>
       </button>
       <div class="side-caption">Tags</div>
       <button class="side-item" [class.is-active]="tagFilter() === NO_TAG" (click)="pickTag(NO_TAG)">
         <span class="dot" style="background: var(--t3)"></span>
-        <span class="side-label">Ohne Tag</span>
+        <span class="side-label">Untagged</span>
         <span class="side-count">{{ tagCounts().none }}</span>
       </button>
       @for (tg of tagCounts().tags; track tg[0]) {
@@ -316,17 +316,17 @@
     <div class="toolbar">
       <div class="toolbar-title">
         <span class="toolbar-h">Torrents</span>
-        <span class="toolbar-sub">{{ counts()['all'] }} gesamt · {{ counts()['active'] }} aktiv</span>
+        <span class="toolbar-sub">{{ counts()['all'] }} total · {{ counts()['active'] }} active</span>
       </div>
       <div class="toolbar-actions">
-        <button class="btn-icon" aria-label="Einstellungen" (click)="pushScreen('settings')">
+        <button class="btn-icon" aria-label="Settings" (click)="pushScreen('settings')">
           <i class="fa-solid fa-gear"></i>
         </button>
         <button class="btn-secondary" (click)="toggleMenu('sort-desktop')">
-          <i class="fa-solid fa-arrow-down-wide-short"></i> Sortieren
+          <i class="fa-solid fa-arrow-down-wide-short"></i> Sort
         </button>
         <button class="btn-accent" (click)="openAdd()">
-          <i class="fa-solid fa-plus"></i> Hinzufügen
+          <i class="fa-solid fa-plus"></i> Add
         </button>
         @if (menu() === 'sort-desktop') {
           <div class="menu-backdrop" (click)="menu.set(null)"></div>
@@ -343,8 +343,8 @@
     </div>
 
     <div class="table-head">
-      <span>Name</span><span>Größe</span><span>Fortschritt</span><span>Status</span>
-      <span>Down</span><span>Up</span><span>Verhältnis</span>
+      <span>Name</span><span>Size</span><span>Progress</span><span>Status</span>
+      <span>Down</span><span>Up</span><span>Ratio</span>
     </div>
     <div class="table-scroll">
       @for (t of visible(); track t.hash) {
@@ -369,8 +369,8 @@
       }
       @if (visible().length === 0) {
         <div class="empty">
-          <div class="empty-title">Keine Treffer</div>
-          <div class="empty-sub">Passe Suche oder Filter an.</div>
+          <div class="empty-title">No matches</div>
+          <div class="empty-sub">Adjust your search or filter.</div>
         </div>
       }
     </div>
@@ -384,7 +384,7 @@
       <div class="dc-card">
         <div class="dc-pct-row">
           <span class="dc-pct" [style.color]="'var(' + STATE_COLOR[t.state] + ')'">{{ pct(t) }}</span>
-          <span class="dc-of">{{ fmtBytes(t.completed) }} von {{ fmtBytes(t.size) }}</span>
+          <span class="dc-of">{{ fmtBytes(t.completed) }} of {{ fmtBytes(t.size) }}</span>
         </div>
         <div class="dc-bar"><div class="dc-bar-fill" [style.width.%]="t.progress * 100" [style.background]="'var(' + STATE_COLOR[t.state] + ')'"></div></div>
         <div class="dc-stats">
@@ -397,7 +397,7 @@
             <div class="dc-value" style="color: var(--ok)">{{ fmtSpeed(t.upspeed) }}</div>
           </div>
           <div>
-            <div class="dc-label">Rest</div>
+            <div class="dc-label">Remaining</div>
             <div class="dc-value">{{ fmtBytes(t.size - t.completed) }}</div>
           </div>
         </div>
@@ -406,37 +406,37 @@
       <div class="dc-actions">
         <button class="dc-btn" (click)="togglePause(t)">
           <i class="fa-solid" [class]="t.state === 'paused' ? 'fa-play' : 'fa-pause'"></i>
-          {{ t.state === 'paused' ? 'Starten' : 'Pausieren' }}
+          {{ t.state === 'paused' ? 'Start' : 'Pause' }}
         </button>
         <button class="dc-btn" (click)="reannounce(t)">
-          <i class="fa-solid fa-tower-broadcast"></i> Neu melden
+          <i class="fa-solid fa-tower-broadcast"></i> Reannounce
         </button>
         <button class="dc-btn dc-btn--bad" (click)="askDelete(t)">
-          <i class="fa-solid fa-trash"></i> Löschen
+          <i class="fa-solid fa-trash"></i> Delete
         </button>
       </div>
 
-      <div class="dc-caption">Übertragung</div>
+      <div class="dc-caption">Transfer</div>
       <div class="dc-card dc-info">
-        <div class="dc-row"><span>Verhältnis</span><span>{{ fmtRatio(t.ratio) }}</span></div>
+        <div class="dc-row"><span>Ratio</span><span>{{ fmtRatio(t.ratio) }}</span></div>
         <div class="dc-row"><span>Seeds</span><span>{{ t.seeds }}</span></div>
         <div class="dc-row"><span>Peers</span><span>{{ t.peers }}</span></div>
-        <div class="dc-row"><span>Verbunden seit</span><span>{{ fmtEta(t.timeActive) }}</span></div>
-        <div class="dc-row"><span>Kategorie</span><span>{{ t.category || '–' }}</span></div>
-        <div class="dc-row"><span>Speicherpfad</span><span class="dc-path">{{ t.savePath }}</span></div>
-        <div class="dc-row"><span>Hinzugefügt</span><span>{{ fmtDate(t.addedOn) }}</span></div>
+        <div class="dc-row"><span>Connected for</span><span>{{ fmtEta(t.timeActive) }}</span></div>
+        <div class="dc-row"><span>Category</span><span>{{ t.category || '–' }}</span></div>
+        <div class="dc-row"><span>Save path</span><span class="dc-path">{{ t.savePath }}</span></div>
+        <div class="dc-row"><span>Added</span><span>{{ fmtDate(t.addedOn) }}</span></div>
         <div class="dc-row"><span>Tracker</span><span>{{ trackerHost(t) }}</span></div>
       </div>
     } @else {
       <div class="empty">
-        <div class="empty-title">Kein Torrent ausgewählt</div>
+        <div class="empty-title">No torrent selected</div>
       </div>
     }
   </aside>
 </div>
 }
 
-<!-- ── Screen 3: Einstellungen (design/README.md §3) ── -->
+<!-- ── Screen 3: settings (design/README.md §3) ── -->
 @if (screen() === 'settings') {
   <div class="push-screen" [class.is-closing]="closing()">
     <nav class="navbar navbar--plain">
@@ -445,33 +445,33 @@
       </button>
     </nav>
     <div class="detail-scroll">
-      <h1 class="settings-title">Einstellungen</h1>
+      <h1 class="settings-title">Settings</h1>
 
       <div class="conn-card">
         <div class="conn-icon"><i class="fa-solid fa-check"></i></div>
         <div>
-          <div class="conn-title">Verbunden</div>
+          <div class="conn-title">Connected</div>
           <div class="conn-sub">{{ host }} · qBittorrent {{ api.server().version || '…' }}</div>
         </div>
       </div>
 
-      <div class="group-caption">Geschwindigkeit</div>
+      <div class="group-caption">Speed</div>
       <div class="info-card">
         <button class="setting-row" (click)="api.toggleAltLimits()">
-          <span>Alternative Limits</span>
+          <span>Alternative limits</span>
           <span class="switch" [class.is-on]="api.altLimits()"><span class="knob"></span></span>
         </button>
         <div class="setting-row">
-          <span>Download-Limit</span>
+          <span>Download limit</span>
           <span class="setting-value">{{ limitLabel(api.dlLimit()) }}</span>
         </div>
         <div class="setting-row">
-          <span>Upload-Limit</span>
+          <span>Upload limit</span>
           <span class="setting-value">{{ limitLabel(api.upLimit()) }}</span>
         </div>
       </div>
 
-      <div class="group-caption">Darstellung</div>
+      <div class="group-caption">Appearance</div>
       <div class="info-card seg-card">
         <div class="segmented segmented--full">
           @for (th of themes; track th) {
@@ -480,26 +480,26 @@
         </div>
       </div>
 
-      <div class="group-caption">Verhalten</div>
+      <div class="group-caption">Behaviour</div>
       <div class="info-card">
         <button class="setting-row" (click)="toggleBehave('resume')">
           <span class="setting-stack">
-            <span>Beim Start fortsetzen</span>
-            <span class="setting-sub">Pausierte Torrents automatisch starten</span>
+            <span>Resume on start</span>
+            <span class="setting-sub">Start paused torrents automatically</span>
           </span>
           <span class="switch" [class.is-on]="behave().resume"><span class="knob"></span></span>
         </button>
         <button class="setting-row" (click)="toggleBehave('notify')">
           <span class="setting-stack">
-            <span>Benachrichtigungen</span>
-            <span class="setting-sub">Bei fertigen Downloads melden</span>
+            <span>Notifications</span>
+            <span class="setting-sub">Notify on finished downloads</span>
           </span>
           <span class="switch" [class.is-on]="behave().notify"><span class="knob"></span></span>
         </button>
         <button class="setting-row" (click)="toggleBehave('wifi')">
           <span class="setting-stack">
-            <span>Nur im WLAN</span>
-            <span class="setting-sub">Downloads nur über WLAN laden</span>
+            <span>Wi-Fi only</span>
+            <span class="setting-sub">Download over Wi-Fi only</span>
           </span>
           <span class="switch" [class.is-on]="behave().wifi"><span class="knob"></span></span>
         </button>
@@ -508,7 +508,7 @@
   </div>
 }
 
-<!-- ── Screen 4: Add-Sheet (design/README.md §4) ── -->
+<!-- ── Screen 4: add sheet (design/README.md §4) ── -->
 @if (sheet() === 'add') {
   <div class="sheet-scrim" [class.is-closing]="sheetClosing()" (click)="closeSheet()"></div>
   <div
@@ -525,14 +525,14 @@
     >
       <div class="grab-handle"></div>
       <div class="sheet-head">
-        <button class="sheet-cancel" (click)="closeSheet()">Abbrechen</button>
-        <div class="sheet-title">Torrent hinzufügen</div>
-        <button class="sheet-done" (click)="confirmAdd()">Fertig</button>
+        <button class="sheet-cancel" (click)="closeSheet()">Cancel</button>
+        <div class="sheet-title">Add torrent</div>
+        <button class="sheet-done" (click)="confirmAdd()">Done</button>
       </div>
     </div>
     <div class="sheet-body">
       <div class="info-card sheet-field">
-        <div class="sheet-label">Magnet-Link</div>
+        <div class="sheet-label">Magnet link</div>
         <input
           class="magnet-input"
           placeholder="magnet:?xt=urn:btih:…"
@@ -541,7 +541,7 @@
         />
       </div>
 
-      <div class="group-caption">Kategorie</div>
+      <div class="group-caption">Category</div>
       <div class="info-card">
         @for (c of api.categories(); track c) {
           <button class="setting-row" (click)="addCat.set(c)">
@@ -550,64 +550,64 @@
           </button>
         }
         <button class="setting-row" (click)="addCat.set('')">
-          <span>Keine</span>
+          <span>None</span>
           <i class="fa-solid fa-check cat-check" [style.opacity]="addCat() === '' ? 1 : 0"></i>
         </button>
       </div>
 
-      <div class="group-caption">Ziel</div>
+      <div class="group-caption">Destination</div>
       <div class="info-card">
         <div class="setting-row">
           <span class="save-path">{{ addSavePath() }}</span>
         </div>
         <button class="setting-row" (click)="startNow.set(!startNow())">
-          <span>Sofort starten</span>
+          <span>Start immediately</span>
           <span class="switch" [class.is-on]="startNow()"><span class="knob"></span></span>
         </button>
       </div>
 
-      <button class="add-confirm" [disabled]="!magnet().trim()" (click)="confirmAdd()">Hinzufügen</button>
+      <button class="add-confirm" [disabled]="!magnet().trim()" (click)="confirmAdd()">Add</button>
     </div>
   </div>
 }
 
-<!-- ── Screen 5: Delete-Dialog (design/README.md §5) ── -->
+<!-- ── Screen 5: delete dialog (design/README.md §5) ── -->
 @if (sheet() === 'del' && delTarget(); as t) {
   <div class="del-scrim" (click)="sheet.set(null)"></div>
   <div class="del-stack">
     <div class="del-card">
       <div class="del-head">
-        <div class="del-title">Torrent entfernen?</div>
+        <div class="del-title">Remove torrent?</div>
         <div class="del-name">{{ t.name }}</div>
       </div>
       <button class="del-switch-row" (click)="delFiles.set(!delFiles())">
-        <span>Dateien auch löschen</span>
+        <span>Also delete files</span>
         <span class="switch" [class.is-on]="delFiles()"><span class="knob"></span></span>
       </button>
-      <button class="del-confirm" (click)="confirmDelete()">Entfernen</button>
+      <button class="del-confirm" (click)="confirmDelete()">Remove</button>
     </div>
-    <button class="del-cancel" (click)="sheet.set(null)">Abbrechen</button>
+    <button class="del-cancel" (click)="sheet.set(null)">Cancel</button>
   </div>
 }
 
-<!-- ── Login (nicht im Design — minimal, gleiche Tokens) ── -->
+<!-- ── Login (not in the design — minimal, same tokens) ── -->
 @if (api.auth() === 'login') {
   <div class="login-scrim">
     <form class="login-card" (submit)="submitLogin(); $event.preventDefault()">
-      <div class="login-title">Anmelden</div>
+      <div class="login-title">Sign in</div>
       <div class="login-sub">{{ host }}</div>
       <input
-        class="login-field" placeholder="Benutzername" autocomplete="username"
+        class="login-field" placeholder="Username" autocomplete="username"
         [value]="loginUser()" (input)="loginUser.set($any($event.target).value)"
       />
       <input
-        class="login-field" type="password" placeholder="Passwort" autocomplete="current-password"
+        class="login-field" type="password" placeholder="Password" autocomplete="current-password"
         [value]="loginPass()" (input)="loginPass.set($any($event.target).value)"
       />
       @if (api.loginError()) {
         <div class="login-error">{{ api.loginError() }}</div>
       }
-      <button class="login-btn" type="submit">Anmelden</button>
+      <button class="login-btn" type="submit">Sign in</button>
     </form>
   </div>
 }

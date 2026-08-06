@@ -1,46 +1,46 @@
-# Design-Auftrag: Eigene qBittorrent WebUI (Mobile-First PWA)
+# Design brief: custom qBittorrent WebUI (mobile-first PWA)
 
-## Kontext
+## Context
 
-Ich betreibe zuhause einen qBittorrent-Container (self-hosted, Docker), dessen Standard-WebUI ich hässlich und unübersichtlich finde. Ich habe bereits Alternativen wie **iQbit** (iOS-artiges Theme) und **VueTorrent** ausprobiert, will aber eine eigene, bessere Lösung bauen – mit eigenem, durchdachtem Design statt einem bestehenden Theme.
+I run a self-hosted qBittorrent container (Docker) at home whose stock WebUI I find ugly and hard to scan. I have already tried alternatives such as **iQbit** (iOS-style theme) and **VueTorrent**, but I want to build my own, better solution — with a deliberate design of my own rather than an existing theme.
 
-Das Ergebnis wird später von Claude Code als eigenständiges GitHub-Repo implementiert und als separater Docker-Container neben dem bestehenden qBittorrent-Setup deployt. Deine Aufgabe jetzt ist **nur das Design** (Screens/Mockups/Designsystem), keine Implementierung.
+The result will later be implemented by Claude Code as a standalone GitHub repo and deployed as a separate Docker container alongside the existing qBittorrent setup. Your task right now is **the design only** (screens/mockups/design system), not the implementation.
 
-## Technischer Rahmen (für Kontext, nicht für dich zu bauen)
+## Technical frame (context, not for you to build)
 
-- Reines Frontend, kein eigenes Backend, keine Datenbank – die App kommuniziert ausschließlich mit der offiziellen qBittorrent WebUI API (`/api/v2/...`), primär über den `sync/maindata`-Endpoint für effizientes Delta-Polling.
-- Stack: Vite + React (oder Vue) + Tailwind CSS, als PWA (installierbar auf iPhone via „Zum Home-Bildschirm").
-- Deployment: eigener Docker-Container, läuft hinter nginx-Reverse-Proxy auf eigener Subdomain.
-- Zielgeräte: **primär iPhone** (PWA, standalone, ohne Safari-Chrome), aber die gleiche App muss auch im Desktop-Browser vollwertig nutzbar sein (responsive, nicht nur „mobile notfall-tauglich").
+- Pure frontend, no backend of its own, no database — the app talks exclusively to the official qBittorrent WebUI API (`/api/v2/...`), primarily via the `sync/maindata` endpoint for efficient delta polling.
+- Stack: Vite + React (or Vue) + Tailwind CSS, as a PWA (installable on iPhone via "Add to Home Screen").
+- Deployment: its own Docker container, running behind an nginx reverse proxy on a dedicated subdomain.
+- Target devices: **primarily iPhone** (PWA, standalone, without Safari chrome), but the same app has to be fully usable in a desktop browser as well (responsive, not just "usable on mobile in a pinch").
 
-## Nutzerkontext
+## User context
 
-Nur ich als einziger Nutzer, technisch versiert, kein Multi-User/Auth-System nötig (Login läuft direkt über die qBittorrent-Credentials). Genutzt wird die App mehrmals täglich, um kurz den Download-Status zu checken, neue Torrents/Magnet-Links hinzuzufügen und gelegentlich Einstellungen (Speed-Limits, Kategorien) anzupassen.
+Just me as the single user, technically experienced, no multi-user/auth system needed (login goes straight through the qBittorrent credentials). The app gets used several times a day to quickly check download status, add new torrents/magnet links and occasionally adjust settings (speed limits, categories).
 
-## Design-Prinzipien
+## Design principles
 
-- Look & Feel angelehnt an native iOS-Apps (Apple Human Interface Guidelines): großzügige Touch-Targets, Safe-Area-Insets, native wirkende Übergänge/Animationen, Bottom-Tab-Navigation auf Mobile.
-- Aufgeräumt und informationsdicht, aber nicht überladen – bewusster Kontrast zum unübersichtlichen Original-WebUI.
-- Automatischer Light/Dark Mode passend zum System.
-- Einhändige Bedienbarkeit auf dem iPhone: wichtige Aktionen (Pause/Resume/Delete) im unteren Bildschirmbereich erreichbar, z.B. via Swipe-Gesten auf Listeneinträgen (wie Mail-App).
-- Auf Desktop: responsive Umbau zu einer Sidebar-Navigation statt Bottom-Tabs, gleiche Informationsarchitektur.
+- Look and feel modelled on native iOS apps (Apple Human Interface Guidelines): generous touch targets, safe-area insets, transitions/animations that feel native, bottom-tab navigation on mobile.
+- Tidy and information-dense, but not cluttered — a deliberate contrast to the messy original WebUI.
+- Automatic light/dark mode following the system.
+- One-handed operation on the iPhone: important actions (pause/resume/delete) reachable in the lower part of the screen, e.g. via swipe gestures on list rows (like the Mail app).
+- On desktop: responsive rework into sidebar navigation instead of bottom tabs, same information architecture.
 
-## Funktionsumfang / benötigte Screens
+## Scope / required screens
 
-1. **Login-Screen** – qBittorrent-Zugangsdaten (Username/Passwort), minimalistisch.
-2. **Torrent-Liste (Hauptscreen)** – pro Torrent: Name, Fortschritt (visuell, z.B. Ring oder Balken), Download-/Upload-Geschwindigkeit, ETA, Größe, Status (downloading/seeding/paused/error), Seeds/Peers. Swipe-Aktionen (Pause/Resume/Delete). Filter/Sortierung nach Status und Kategorie. Mehrfachauswahl für Bulk-Aktionen.
-3. **Torrent-Detail-Screen** – Dateien im Torrent (mit Priorität einstellbar), Tracker-Liste, Peers, individuelle Speed-Limits, Kategorie/Tags zuweisen.
-4. **Torrent hinzufügen** – per Magnet-Link (Paste/Share-Sheet-Integration auf iOS wäre ideal), per .torrent-Datei-Upload, oder per URL. Auswahl Speicherort/Kategorie beim Hinzufügen.
-5. **Globale Status-Leiste** – aktuelle Gesamt-Download-/Upload-Geschwindigkeit, freier Speicherplatz, Alt-Speed-Toggle (Turtle Mode).
-6. **Einstellungen** – globale Speed-Limits, Kategorien verwalten, ggf. Grundeinstellungen die über die API steuerbar sind.
+1. **Login screen** — qBittorrent credentials (username/password), minimal.
+2. **Torrent list (main screen)** — per torrent: name, progress (visual, e.g. ring or bar), download/upload speed, ETA, size, state (downloading/seeding/paused/error), seeds/peers. Swipe actions (pause/resume/delete). Filtering/sorting by state and category. Multi-select for bulk actions.
+3. **Torrent detail screen** — files inside the torrent (with adjustable priority), tracker list, peers, per-torrent speed limits, assigning category/tags.
+4. **Add torrent** — via magnet link (paste/share-sheet integration on iOS would be ideal), via .torrent file upload, or via URL. Choice of save location/category while adding.
+5. **Global status bar** — current total download/upload speed, free disk space, alt-speed toggle (turtle mode).
+6. **Settings** — global speed limits, manage categories, plus any base settings controllable through the API.
 
-## Nicht im Scope
+## Out of scope
 
-- Kein Multi-User/Accounts-System
-- Keine Suche/Discovery von Torrents (nur Verwaltung bestehender/manuell hinzugefügter)
-- Keine Server-seitige Persistenz oder Analytics
-- Keine Unterstützung für mehrere qBittorrent-Instanzen gleichzeitig (erstmal nur eine)
+- No multi-user/accounts system
+- No torrent search/discovery (managing existing/manually added ones only)
+- No server-side persistence or analytics
+- No support for several qBittorrent instances at once (just one for now)
 
-## Was ich von dir erwarte
+## What I expect from you
 
-Bitte erstelle ein Mockup/Design (visuell, als HTML/CSS-Prototyp oder vergleichbar) für die oben genannten Screens, in erster Linie für iPhone-Viewport (mit Safe-Area-Berücksichtigung), plus eine Andeutung, wie sich das Ganze responsive auf Desktop-Breite verhält. Definiere dabei auch ein kleines Designsystem (Farben für Light/Dark Mode, Typografie, Abstände, Icon-Stil), das ich danach 1:1 an eine Implementierung übergeben kann.
+Please create a mockup/design (visual, as an HTML/CSS prototype or equivalent) for the screens listed above, primarily for the iPhone viewport (respecting safe areas), plus an indication of how the whole thing behaves responsively at desktop width. Also define a small design system (colours for light/dark mode, typography, spacing, icon style) that I can then hand over 1:1 to an implementation.

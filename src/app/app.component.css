@@ -1,4 +1,4 @@
-/* ── Screen 1: Torrent-Liste ── */
+/* ── Screen 1: torrent list ── */
 
 .screen {
   min-height: 100dvh;
@@ -370,7 +370,7 @@ h1 {
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-/* ── Screen 7: Desktop (design/README.md §7) ── */
+/* ── Screen 7: desktop (design/README.md §7) ── */
 .desktop {
   display: grid;
   grid-template-columns: 236px 1fr 316px;
@@ -603,13 +603,13 @@ h1 {
 }
 .dc-path { direction: rtl; font-family: ui-monospace, monospace; font-size: 12px; }
 
-/* Detail-Spalte kollabiert zuerst (design §7 Responsive) */
+/* Detail column collapses first (design §7 responsive) */
 @media (max-width: 1240px) {
   .desktop { grid-template-columns: 236px 1fr; }
   .detail-col { display: none; }
 }
 
-/* ── Screen 5: Delete-Dialog ── */
+/* ── Screen 5: delete dialog ── */
 .del-scrim {
   position: fixed;
   inset: 0;
@@ -675,7 +675,7 @@ h1 {
   color: var(--ac);
 }
 
-/* Switch — 51×31, radius 16, 27px knob (design §3 Einstellungen) */
+/* Switch — 51×31, radius 16, 27px knob (design §3 settings) */
 .switch {
   width: 51px;
   height: 31px;
@@ -697,7 +697,7 @@ h1 {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.18);
 }
 
-/* ── Push-Screens: Detail & Einstellungen ── */
+/* ── Push screens: detail & settings ── */
 .push-screen {
   position: fixed;
   inset: 0;
@@ -905,7 +905,7 @@ h1 {
 }
 .tracker-sub { margin-top: 2px; font-size: 12px; color: var(--t2); }
 
-/* Einstellungen */
+/* Settings */
 .settings-title {
   margin: 4px 4px 16px;
   font-size: 46px;
@@ -961,7 +961,7 @@ h1 {
 .setting-sub { font-size: 12.5px; color: var(--t2); }
 .seg-card { padding: 10px 12px; }
 
-/* ── Add-Sheet ── */
+/* ── Add sheet ── */
 .sheet-scrim {
   position: fixed;
   inset: 0;
@@ -1054,7 +1054,7 @@ h1 {
 .add-confirm:disabled { opacity: 0.45; }
 .add-confirm:active:not(:disabled) { transform: scale(0.98); }
 
-/* Icon-Button im Desktop-Toolbar (Einstellungen) */
+/* Icon button in the desktop toolbar (settings) */
 .btn-icon {
   width: 32px;
   height: 32px;
@@ -1066,15 +1066,15 @@ h1 {
   font-size: 13px;
 }
 
-/* Push-Screens auf dem Desktop mittig begrenzen */
+/* Constrain push screens on desktop */
 @media (min-width: 900px) {
   .push-screen .detail-scroll,
   .push-screen .navbar { max-width: 640px; margin-left: auto; margin-right: auto; width: 100%; }
 }
 
-/* Pfade von hinten kuerzen: direction:rtl schiebt sonst den fuehrenden
-   Slash ans Ende, weil "/" ein neutrales Zeichen ist. Ein Left-to-Right
-   Mark davor faengt die Neutralen ab. */
+/* Truncate paths from the start: direction:rtl otherwise pushes the leading
+   slash to the end, because "/" is a bidi-neutral character. A Left-to-Right
+   Mark in front anchors the neutrals. */
 .info-mono::before,
 .dc-path::before,
 .save-path::before { content: '\200E'; }
