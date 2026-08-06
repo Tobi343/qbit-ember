@@ -9,7 +9,13 @@ offizielle [qBittorrent WebUI API v2](https://github.com/qbittorrent/qBittorrent
 (`/api/v2/...`), primär `sync/maindata` als Delta-Polling im 1,1s-Takt. Login läuft 1:1 über
 die qBittorrent-Zugangsdaten.
 
-<!-- Screenshot folgt -->
+![Desktop-Layout](docs/screenshots/desktop.png)
+
+| Liste | Detail | Hinzufügen | Einstellungen |
+|---|---|---|---|
+| ![Torrent-Liste](docs/screenshots/mobile-liste.png) | ![Torrent-Detail](docs/screenshots/mobile-detail.png) | ![Torrent hinzufügen](docs/screenshots/mobile-hinzufuegen.png) | ![Einstellungen](docs/screenshots/mobile-einstellungen.png) |
+
+<sub>Screenshots mit Demo-Daten (`tools/screenshot/`), nicht mit einer echten Bibliothek.</sub>
 
 ## Stack
 

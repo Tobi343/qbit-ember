@@ -1071,3 +1071,10 @@ h1 {
   .push-screen .detail-scroll,
   .push-screen .navbar { max-width: 640px; margin-left: auto; margin-right: auto; width: 100%; }
 }
+
+/* Pfade von hinten kuerzen: direction:rtl schiebt sonst den fuehrenden
+   Slash ans Ende, weil "/" ein neutrales Zeichen ist. Ein Left-to-Right
+   Mark davor faengt die Neutralen ab. */
+.info-mono::before,
+.dc-path::before,
+.save-path::before { content: '\200E'; }
