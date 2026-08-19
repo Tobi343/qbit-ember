@@ -66,22 +66,71 @@ Raspberry Pi never have to build it themselves.
 
 ## Cleanuparr (optional)
 
-If you run [Cleanuparr](https://cleanuparr.github.io/Cleanuparr/), point the container at it and
-settings shows whether the connection works (including a rejected API key), a dedicated
-Cleanuparr screen carries the stats, and — matched on the torrent hash — a strike card appears
-on the detail screen, so a stalled download tells you whether something is already handling it. Leave it unset and the app
-behaves exactly as if the integration did not exist — nothing is shown, nothing is polled.
+[Cleanuparr](https://cleanuparr.github.io/Cleanuparr/) watches your *arr queues and removes
+downloads that stall, fail to import or turn out to be junk. Connect it and qbit-ember can tell
+you whether a problematic torrent is already being handled instead of leaving you guessing.
+
+Skip this section entirely if you don't run Cleanuparr. Unconfigured, the app looks and behaves
+exactly as it does without the integration — nothing is shown and nothing is polled.
+
+### 1. Get the API key
+
+Open your Cleanuparr web UI and copy the key from **Account settings**.
+
+### 2. Add two environment variables
 
 ```yaml
     environment:
       - CLEANUPARR_URL=http://cleanuparr:11011
-      - CLEANUPARR_API_KEY=<from Cleanuparr → account settings>
+      - CLEANUPARR_API_KEY=${CLEANUPARR_API_KEY}
 ```
 
-The API key is injected by nginx, so it never reaches the browser. The hostname is resolved per
-request, which means an unreachable or unconfigured Cleanuparr answers 502 and the UI hides the
-feature instead of nginx failing to start. Outside a Docker network, also set `DNS_RESOLVER` to a
-reachable DNS server (default is Docker's embedded `127.0.0.11`).
+Keep the key itself out of the compose file — put it in your stack's environment (Komodo: stack
+variables, plain compose: an `.env` file next to it).
+
+`CLEANUPARR_URL` is the address **as seen from inside the container**:
+
+| Where Cleanuparr runs | Use |
+|---|---|
+| Same compose stack | `http://cleanuparr:11011` (the service name) |
+| A different stack, or outside Docker | `http://<host-ip>:11011` |
+| Not on a Docker network at all | also set `DNS_RESOLVER` to a reachable DNS server |
+
+No `depends_on` is needed. Unlike `QBIT_API_URL`, the Cleanuparr hostname is resolved per
+request, so it may start later, restart, or be missing entirely — qbit-ember starts either way.
+
+### 3. Check that it worked
+
+Open **Settings**. Under the qBittorrent card sits a Cleanuparr card that names the problem
+directly:
+
+| Card says | Meaning | Fix |
+|---|---|---|
+| **Connected** (green) | Key and URL are good | — |
+| **Key rejected** (red) | Cleanuparr answered but refused the key | Copy the key again from Account settings into `CLEANUPARR_API_KEY` |
+| **Not reachable** (amber) | It worked before and is gone now | Check the Cleanuparr container and `CLEANUPARR_URL` |
+| **Not connected** (grey) | Never reached it | Check `CLEANUPARR_URL`; grey because not running Cleanuparr is a valid choice, not a fault |
+
+Tapping the card opens a Cleanuparr screen with removed items, strikes and events for the last
+24 hours plus a per-job breakdown.
+
+### What you get
+
+- **Settings** — the connection card above, and the Cleanuparr screen behind it
+- **Torrent detail** — for any torrent Cleanuparr has touched, a card with its strike count,
+  the last action, the reason and when it happened, matched on the torrent hash
+- **Attention line** — a rejected key, a Cleanuparr that has gone silent, or failing jobs are
+  called out above the list; a quiet line reports what it cleaned up
+
+The key never reaches the browser: nginx injects the `X-Api-Key` header inside the container, and
+the frontend only ever calls `/cleanuparr/...` on its own origin.
+
+### Limitations
+
+- The strike **threshold** is not shown ("2 strikes", not "2 of 3") — Cleanuparr's events API
+  reports the count but not the configured maximum.
+- Per-torrent context comes from the last 200 events. With a very large library, strikes older
+  than that window drop off the detail screen.
 
 ## Deployment (docker compose / Komodo)
 
@@ -92,9 +141,9 @@ services:
     container_name: qbit-ember
     environment:
       - QBIT_API_URL=http://gluetun:8080   # qBittorrent WebUI behind Gluetun
-      # optional, see above — omit entirely if you don't run Cleanuparr
+      # optional, see the Cleanuparr section — omit both if you don't run it
       # - CLEANUPARR_URL=http://cleanuparr:11011
-      # - CLEANUPARR_API_KEY=...
+      # - CLEANUPARR_API_KEY=${CLEANUPARR_API_KEY}
     ports:
       - "8091:8091"
     networks:
