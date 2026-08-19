@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { QbitApiService, STATE_COLOR, STATE_LABEL, Torrent, TorrentFile, Tracker, UiState } from './qbit-api.service';
-import { fmtBytes, fmtDate, fmtEta, fmtRatio, fmtSpeed, techLine } from './format';
+import { fmtBytes, fmtDate, fmtEta, fmtIsoDate, fmtRatio, fmtSpeed, techLine } from './format';
 import { CleanuparrService } from './cleanuparr.service';
 import { buildAttention } from './attention';
 
@@ -79,6 +79,7 @@ export class AppComponent {
   readonly fmtRatio = fmtRatio;
   readonly fmtEta = fmtEta;
   readonly fmtDate = fmtDate;
+  readonly fmtIsoDate = fmtIsoDate;
   readonly host = location.host;
 
   // ── State (design/README.md "State") ─────────────────────
@@ -202,6 +203,13 @@ export class AppComponent {
           }
         : null,
     });
+  });
+
+  // Cleanuparr context for the torrent on the detail screen, if it knows it
+  readonly detailCleanuparr = computed(() => {
+    const t = this.detailTorrent();
+    if (!t || !this.cleanuparr.reachable()) return null;
+    return this.cleanuparr.items().get(t.hash.toLowerCase()) ?? null;
   });
 
   // add sheet: derived save path (design §4 "ZIEL")

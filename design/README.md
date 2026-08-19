@@ -202,7 +202,10 @@ Full-screen push over the list.
   Pause / Reannounce / Share in `--t2`, **Delete in `--bad`**.
 * **Segmented control** (`--fill`, radius 9, 2px padding; active segment `--c1` + `0 1px 3px
   rgba(0,0,0,0.12)`): Info · Files · Trackers.
-  * **Info** — rows: Status, Category, Ratio, Seeds, Peers, Added, Save path, Hash.
+  * **Info** — when Cleanuparr knows this torrent (matched on hash via its events API), a
+    **CLEANUPARR** card comes first: strikes (amber above zero), last action, reason, timestamp.
+    Then a **DETAILS** card: Status, Category, Ratio, Seeds, Peers, Added, Save path, Hash.
+    Without Cleanuparr, or for a torrent it has never touched, only the details card is shown.
   * **Files** — file name + size, with a 3px progress line (blue while incomplete, green at 100%).
   * **Trackers** — 8px status dot (green working / red unreachable), URL + status, peer count.
     Includes `** [DHT] **`, `** [PeX] **`.

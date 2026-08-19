@@ -73,6 +73,17 @@ createServer(async (req, res) => {
 
   // Cleanuparr is only mocked when CLEANUPARR=1, so the default screenshots
   // show the app as it looks without the optional integration.
+  if (p === '/cleanuparr/api/events') {
+    if (!process.env['CLEANUPARR']) { res.writeHead(502); return res.end('no cleanuparr'); }
+    return json({ items: [
+      { itemHash: 'h6', strikeCount: 2, eventType: 'StrikeAdded', severity: 'Warning',
+        timestamp: '2026-08-19T06:12:44Z', message: 'Strike added', deleteReason: null,
+        cleanReason: 'Stalled for longer than the configured limit', failedImportReasons: [] },
+      { itemHash: 'h1', strikeCount: 0, eventType: 'SearchTriggered', severity: 'Information',
+        timestamp: '2026-08-19T05:40:02Z', message: 'Search triggered', failedImportReasons: [] },
+    ] });
+  }
+
   if (p === '/cleanuparr/api/stats') {
     if (!process.env['CLEANUPARR']) { res.writeHead(502); return res.end('no cleanuparr'); }
     return json({

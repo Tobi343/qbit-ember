@@ -66,7 +66,9 @@ Raspberry Pi never have to build it themselves.
 ## Cleanuparr (optional)
 
 If you run [Cleanuparr](https://cleanuparr.github.io/Cleanuparr/), point the container at it and
-its cleanup numbers show up in the attention line and in settings. Leave it unset and the app
+its cleanup numbers show up in the attention line, in settings, and — matched on the torrent
+hash — as a strike card on the detail screen, so a stalled download tells you whether something
+is already handling it. Leave it unset and the app
 behaves exactly as if the integration did not exist — nothing is shown, nothing is polled.
 
 ```yaml

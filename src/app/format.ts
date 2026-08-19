@@ -46,6 +46,13 @@ export function fmtDate(unixSeconds: number): string {
     + ', ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
+// Cleanuparr timestamps are ISO strings, not unix seconds
+export function fmtIsoDate(iso: string): string {
+  const d = new Date(iso);
+  if (!iso || Number.isNaN(d.getTime())) return '–';
+  return fmtDate(Math.floor(d.getTime() / 1000));
+}
+
 // Tech line for a torrent row: "1080p · BluRay · x265 · 35.6 GB · tv-sonarr"
 export function techLine(name: string, size: number, category: string): string {
   const parts: string[] = [];

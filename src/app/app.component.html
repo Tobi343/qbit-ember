@@ -222,6 +222,23 @@
       </div>
 
       @if (dtab() === 'info') {
+        @if (detailCleanuparr(); as cu) {
+          <div class="group-caption">Cleanuparr</div>
+          <div class="info-card">
+            @if (cu.strikes !== null) {
+              <div class="info-row">
+                <span>Strikes</span>
+                <span [style.color]="cu.strikes > 0 ? 'var(--warn)' : null">{{ cu.strikes }}</span>
+              </div>
+            }
+            <div class="info-row"><span>Last action</span><span>{{ cu.eventType }}</span></div>
+            @if (cu.reason) {
+              <div class="info-row info-row--wrap"><span>Reason</span><span>{{ cu.reason }}</span></div>
+            }
+            <div class="info-row"><span>When</span><span>{{ fmtIsoDate(cu.at) }}</span></div>
+          </div>
+          <div class="group-caption">Details</div>
+        }
         <div class="info-card">
           <div class="info-row"><span>Status</span><span [style.color]="'var(' + STATE_COLOR[t.state] + ')'">{{ STATE_LABEL[t.state] }}</span></div>
           <div class="info-row"><span>Category</span><span>{{ t.category || '–' }}</span></div>

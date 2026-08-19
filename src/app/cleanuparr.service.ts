@@ -7,6 +7,17 @@ import { Injectable, signal } from '@angular/core';
 
 export interface CleanuparrJob { name: string; totalRuns: number; failed: number; }
 
+/** Latest Cleanuparr event that names a specific torrent, keyed by hash. */
+export interface CleanuparrItem {
+  hash: string;
+  strikes: number | null;
+  eventType: string;
+  message: string;
+  reason: string;
+  at: string;
+  severity: string;
+}
+
 export interface CleanuparrStats {
   events: number;
   strikes: number;
@@ -18,6 +29,7 @@ export interface CleanuparrStats {
 const POLL_MS = 60_000;   // ponytail: cleanup stats move slowly, no need for the 1.1s torrent cadence
 const IDLE_MS = 600_000;  // never configured: back off hard so an absent Cleanuparr costs nothing
 const WINDOW_H = 24;
+const EVENT_PAGE = 200;
 const SEEN_KEY = 'cleanuparr-seen';
 // How long a past sighting keeps counting as "configured". Long enough that an
 // outage over a weekend is still reported, short enough that removing
@@ -27,6 +39,8 @@ const SEEN_TTL_MS = 7 * 24 * 3600_000;
 @Injectable({ providedIn: 'root' })
 export class CleanuparrService {
   readonly stats = signal<CleanuparrStats | null>(null);
+  /** hash (lowercase) → most recent event naming that torrent */
+  readonly items = signal<Map<string, CleanuparrItem>>(new Map());
   readonly reachable = signal(false);
   /** True once Cleanuparr has answered at least once — persisted, so a restart
    *  while it is down still counts as "configured but silent" rather than
@@ -48,6 +62,7 @@ export class CleanuparrService {
       if (r.ok) {
         this.stats.set(parse(await r.json()));
         this.reachable.set(true);
+        void this.fetchEvents();
         this.configured.set(true);
         localStorage.setItem(SEEN_KEY, String(Date.now()));
       } else {
@@ -61,6 +76,46 @@ export class CleanuparrService {
     const next = this.reachable() || this.configured() ? POLL_MS : IDLE_MS;
     this.timer = setTimeout(() => void this.poll(), next);
   }
+
+  /** Events carry the torrent hash, which is what makes the per-torrent
+   *  context possible. Failure here only costs that context, never the rest. */
+  private async fetchEvents(): Promise<void> {
+    try {
+      const r = await fetch(`/cleanuparr/api/events?pageSize=${EVENT_PAGE}`);
+      if (!r.ok) return;
+      const body = await r.json();
+      const list: any[] = Array.isArray(body) ? body : body?.items ?? [];
+      const map = new Map<string, CleanuparrItem>();
+      for (const e of list) {
+        const hash = String(e?.itemHash ?? '').toLowerCase();
+        if (!hash) continue;
+        // the API returns newest first, so the first hit per hash wins
+        if (map.has(hash)) continue;
+        map.set(hash, {
+          hash,
+          strikes: typeof e?.strikeCount === 'number' ? e.strikeCount : null,
+          eventType: humanize(e?.eventType ?? ''),
+          message: e?.message ?? '',
+          reason: reasonOf(e),
+          at: e?.timestamp ?? '',
+          severity: e?.severity ?? 'Information',
+        });
+      }
+      this.items.set(map);
+    } catch {
+      // leave the previous map in place
+    }
+  }
+}
+
+function humanize(type: string): string {
+  const words = type.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+  return words.charAt(0) + words.slice(1).toLowerCase();
+}
+
+function reasonOf(e: any): string {
+  const failed = Array.isArray(e?.failedImportReasons) ? e.failedImportReasons : [];
+  return e?.deleteReason ?? e?.cleanReason ?? (failed.length ? failed.join(', ') : '');
 }
 
 function seenRecently(): boolean {

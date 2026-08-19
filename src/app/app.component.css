@@ -1121,3 +1121,7 @@ h1 {
   min-height: 38px;
   padding: 8px 12px;
 }
+
+/* Long Cleanuparr reasons wrap instead of being cut off mid-sentence */
+.info-row--wrap { align-items: flex-start; }
+.info-row--wrap > span:last-child { white-space: normal; text-align: right; line-height: 1.35; }
