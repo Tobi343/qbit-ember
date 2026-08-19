@@ -4,11 +4,12 @@ import { fmtBytes, fmtDate, fmtEta, fmtIsoDate, fmtRatio, fmtSpeed, techLine } f
 import { CleanuparrService } from './cleanuparr.service';
 import { buildAttention } from './attention';
 
-type Filter = 'active' | 'all' | 'down' | 'done' | 'paused' | 'seeding' | 'completed' | 'stalled' | 'error';
+type Filter = 'attention' | 'active' | 'all' | 'down' | 'done' | 'paused' | 'seeding' | 'completed' | 'stalled' | 'error';
 type Sort = 'status' | 'name' | 'size' | 'progress';
 export type Theme = 'light' | 'dark' | 'auto';
 
 const FILTER_LABEL: Record<Filter, string> = {
+  attention: 'Attention',
   active: 'Active', all: 'All', down: 'Downloading', done: 'Complete', paused: 'Queued',
   seeding: 'Seeding', completed: 'Complete', stalled: 'Stalled', error: 'Error',
 };
@@ -17,6 +18,7 @@ const SORT_LABEL: Record<Sort, string> = {
 };
 
 const FILTER_FN: Record<Filter, (t: Torrent) => boolean> = {
+  attention: needsAttention,
   all: () => true,
   active: t => t.dlspeed > 0 || t.upspeed > 0 || t.state === 'downloading' || t.state === 'metadata',
   down: t => t.state === 'downloading' || t.state === 'stalled',
@@ -30,6 +32,7 @@ const FILTER_FN: Record<Filter, (t: Torrent) => boolean> = {
 
 // sidebar state-dot colour per filter (design §7)
 const FILTER_DOT: Record<Filter, string> = {
+  attention: '--warn',
   all: '--t3', active: '--dl', down: '--dl', done: '--ok', paused: '--t3',
   seeding: '--ok', completed: '--ok', stalled: '--warn', error: '--bad',
 };
@@ -47,6 +50,18 @@ const SHEET_MS = 340; // sheet up/down
 // ponytail: a download at 0 B/s is normal for a moment; half an hour is not.
 // Raise it if your trackers are slow to warm up.
 const STUCK_AFTER_S = 1800;
+
+/** A download that says it is running but has not moved a byte in a while. */
+function isStuck(t: Torrent): boolean {
+  return (t.state === 'downloading' || t.state === 'metadata')
+    && t.dlspeed === 0
+    && t.timeActive > STUCK_AFTER_S;
+}
+
+/** Exactly what the attention line is talking about, so tapping it can show them. */
+function needsAttention(t: Torrent): boolean {
+  return t.state === 'error' || t.state === 'stalled' || isStuck(t);
+}
 
 interface Behave { resume: boolean; notify: boolean; wifi: boolean; }
 
@@ -70,8 +85,9 @@ export class AppComponent {
   readonly RING_C = RING_C;
   readonly NO_CAT = NO_CAT;
   readonly NO_TAG = NO_TAG;
-  readonly filters: Filter[] = ['active', 'all', 'down', 'done', 'paused'];
-  readonly sideFilters: Filter[] = ['active', 'all', 'down', 'seeding', 'completed', 'paused', 'stalled', 'error'];
+  private readonly baseFilters: Filter[] = ['active', 'all', 'down', 'done', 'paused'];
+  private readonly baseSideFilters: Filter[] =
+    ['active', 'all', 'down', 'seeding', 'completed', 'paused', 'stalled', 'error'];
   readonly sorts: Sort[] = ['status', 'name', 'size', 'progress'];
   readonly themes: Theme[] = ['light', 'dark', 'auto'];
   readonly THEME_LABEL: Record<Theme, string> = { light: 'Light', dark: 'Dark', auto: 'Automatic' };
@@ -83,6 +99,7 @@ export class AppComponent {
   readonly fmtEta = fmtEta;
   readonly fmtDate = fmtDate;
   readonly fmtIsoDate = fmtIsoDate;
+  readonly isStuck = isStuck;
   readonly host = location.host;
 
   // ── State (design/README.md "State") ─────────────────────
@@ -121,6 +138,18 @@ export class AppComponent {
 
   readonly loginUser = signal('');
   readonly loginPass = signal('');
+
+  /** 'Needs attention' is listed only while it has something in it, or while it
+   *  is the current filter — an always-present entry reading 0 is just noise. */
+  readonly filters = computed(() =>
+    this.counts()['attention'] > 0 || this.filter() === 'attention'
+      ? ['attention', ...this.baseFilters] as Filter[]
+      : this.baseFilters);
+
+  readonly sideFilters = computed(() =>
+    this.counts()['attention'] > 0 || this.sideFilter() === 'attention'
+      ? ['attention', ...this.baseSideFilters] as Filter[]
+      : this.baseSideFilters);
 
   readonly counts = computed(() => {
     const list = this.api.torrents();
@@ -196,7 +225,7 @@ export class AppComponent {
     return buildAttention({
       errors: list.filter(t => t.state === 'error').length,
       stalled: list.filter(t => t.state === 'stalled').length,
-      stuck: list.filter(t => this.isStuck(t)).length,
+      stuck: list.filter(isStuck).length,
       freeSpace: this.api.server().freeSpace,
       cleanuparr: this.cleanuparr.configured()
         ? {
@@ -209,13 +238,6 @@ export class AppComponent {
         : null,
     });
   });
-
-  /** A download that says it is running but has not moved a byte in a while. */
-  isStuck(t: Torrent): boolean {
-    return (t.state === 'downloading' || t.state === 'metadata')
-      && t.dlspeed === 0
-      && t.timeActive > STUCK_AFTER_S;
-  }
 
   readonly cleanuparrLabel = computed(() => {
     switch (this.cleanuparr.status()) {
@@ -290,7 +312,7 @@ export class AppComponent {
     // line exists for. How long it has been that way is the useful part —
     // 0 KB/s and ETA ∞ told the user nothing.
     if (t.state === 'metadata') return `for ${fmtEta(t.timeActive)}`;
-    if (this.isStuck(t)) return `stuck for ${fmtEta(t.timeActive)}`;
+    if (isStuck(t)) return `stuck for ${fmtEta(t.timeActive)}`;
     switch (t.state) {
       // ponytail: no percentage here — the progress ring next to it already shows it,
       // and the English labels are long enough to truncate the line on a narrow phone
@@ -499,8 +521,8 @@ export class AppComponent {
     this.q.set('');
     this.sort.set('status');
     this.dir.set(1);
-    if (this.isDesktop()) this.sideFilter.set('all');
-    else this.filter.set('all');
+    if (this.isDesktop()) { this.sideFilter.set('attention'); this.catFilter.set(null); this.tagFilter.set(null); }
+    else this.filter.set('attention');
   }
 
   toggleMenu(which: 'filter' | 'sort' | 'sort-desktop'): void {

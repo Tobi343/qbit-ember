@@ -79,7 +79,7 @@
     <div class="menu-backdrop" (click)="menu.set(null)"></div>
     <div class="menu" [class.menu--sort]="menu() === 'sort'">
       @if (menu() === 'filter') {
-        @for (f of filters; track f) {
+        @for (f of filters(); track f) {
           <button class="menu-item" (click)="pickFilter(f)">
             <i class="fa-solid fa-check" [style.opacity]="filter() === f ? 1 : 0"></i>
             <span>{{ FILTER_LABEL[f] }}</span>
@@ -101,8 +101,13 @@
     @if (visible().length === 0) {
       <div class="list-group">
         <div class="empty">
-          <div class="empty-title">No matches</div>
-          <div class="empty-sub">Adjust your search or filter.</div>
+          @if (filter() === 'attention' && !q()) {
+            <div class="empty-title">Nothing needs attention</div>
+            <div class="empty-sub">No errors, stalled or stuck downloads.</div>
+          } @else {
+            <div class="empty-title">No matches</div>
+            <div class="empty-sub">Adjust your search or filter.</div>
+          }
         </div>
       </div>
     } @else {
@@ -301,7 +306,7 @@
     </div>
     <div class="sidebar-scroll">
       <div class="side-caption">Status</div>
-      @for (f of sideFilters; track f) {
+      @for (f of sideFilters(); track f) {
         <button class="side-item" [class.is-active]="sideFilter() === f" (click)="pickSideFilter(f)">
           <span class="dot" [style.background]="'var(' + FILTER_DOT[f] + ')'"></span>
           <span class="side-label">{{ FILTER_LABEL[f] }}</span>
@@ -408,8 +413,13 @@
       }
       @if (visible().length === 0) {
         <div class="empty">
-          <div class="empty-title">No matches</div>
-          <div class="empty-sub">Adjust your search or filter.</div>
+          @if (sideFilter() === 'attention' && !q()) {
+            <div class="empty-title">Nothing needs attention</div>
+            <div class="empty-sub">No errors, stalled or stuck downloads.</div>
+          } @else {
+            <div class="empty-title">No matches</div>
+            <div class="empty-sub">Adjust your search or filter.</div>
+          }
         </div>
       }
     </div>

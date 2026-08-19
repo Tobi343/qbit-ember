@@ -25,7 +25,8 @@ straight through your qBittorrent credentials.
 - Light / dark / automatic theme, installable as a PWA on iOS and Android
 - Responsive: phone layout below 900px, three-column desktop above
 - An attention line above the list that appears only when something needs you — errored,
-  stalled or stuck torrents, low disk space, or a Cleanuparr that has gone quiet
+  stalled or stuck torrents, low disk space, or a Cleanuparr that has gone quiet. Tapping it
+  filters the list down to exactly those torrents
 - Torrents waiting on metadata are called out as such instead of posing as downloads
 
 ## Stack

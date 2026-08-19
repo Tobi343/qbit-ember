@@ -185,7 +185,12 @@ tapping an open row closes it.
 a single row, radius 12, 44px min height, present *only* when something needs the user —
 errored, stalled or stuck torrents, low free space, or an optional Cleanuparr that is
 unreachable, rejecting the key, or has failing jobs. Warning variant: `--warn` text on a 14% `--warn` tint. Quiet variant: `--t2` on `--fill`,
-used to report what Cleanuparr cleaned up. Tapping jumps to the affected torrents or to settings.
+used to report what Cleanuparr cleaned up. Tapping switches to the **Attention** filter, which contains exactly what the line counts —
+errored, stalled and stuck torrents — or opens settings when the problem is Cleanuparr itself.
+That filter is listed in the phone dropdown and at the top of the desktop sidebar only while it
+holds something (or is currently selected); an entry permanently reading 0 is noise. Its empty
+state reads "Nothing needs attention" rather than "No matches", because here that is the good
+outcome.
 Stalled and stuck torrents are reported regardless of Cleanuparr: suppressing them left the list
 looking healthy while nothing moved. Whether Cleanuparr is already on it belongs on the detail
 screen, not in this line.
