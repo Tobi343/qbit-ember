@@ -144,7 +144,9 @@
                 <div class="row-tech">{{ techLine(t) }}</div>
                 <div class="row-status">
                   <span [style.color]="'var(' + STATE_COLOR[t.state] + ')'">{{ STATE_LABEL[t.state] }}</span>
-                  <span class="row-status-detail"> · {{ statusDetail(t) }}</span>
+                  @if (statusDetail(t); as detail) {
+                    <span class="row-status-detail"> · {{ detail }}</span>
+                  }
                 </div>
               </div>
               <i class="fa-solid fa-chevron-right row-chev"></i>
@@ -393,7 +395,7 @@
               <span class="tsub">{{ techLine(t) }}</span>
             </span>
           </span>
-          <span class="tcell">{{ fmtBytes(t.size) }}</span>
+          <span class="tcell">{{ t.size > 0 ? fmtBytes(t.size) : '–' }}</span>
           <span class="tcell tcell-prog">
             <span class="tbar"><span class="tbar-fill" [style.width.%]="t.progress * 100" [style.background]="'var(' + STATE_COLOR[t.state] + ')'"></span></span>
             <span class="tpct">{{ pct(t) }}</span>
@@ -474,8 +476,8 @@
 }
 
 <!-- ── Screen 3: settings (design/README.md §3) ── -->
-@if (screen() === 'settings') {
-  <div class="push-screen" [class.is-closing]="closing()">
+@if (screen() === 'settings' || screen() === 'cleanuparr') {
+  <div class="push-screen" [class.is-closing]="closing() && screen() === 'settings'">
     <nav class="navbar navbar--plain">
       <button class="nav-back" (click)="back()">
         <i class="fa-solid fa-chevron-left"></i> Torrents
@@ -491,6 +493,18 @@
           <div class="conn-sub">{{ host }} · qBittorrent {{ api.server().version || '…' }}</div>
         </div>
       </div>
+
+      <button class="conn-card conn-card--btn" (click)="pushScreen('cleanuparr')">
+        <div class="conn-icon" [class]="'conn-icon--' + cleanuparrLabel().tone">
+          <i class="fa-solid" [class]="cleanuparr.status() === 'ok' ? 'fa-check'
+            : cleanuparr.status() === 'unknown' ? 'fa-ellipsis' : 'fa-exclamation'"></i>
+        </div>
+        <div class="conn-text">
+          <div class="conn-title">Cleanuparr · {{ cleanuparrLabel().text }}</div>
+          <div class="conn-sub">{{ cleanuparrLabel().sub || 'Optional integration' }}</div>
+        </div>
+        <i class="fa-solid fa-chevron-right conn-chev"></i>
+      </button>
 
       <div class="group-caption">Speed</div>
       <div class="info-card">
@@ -517,25 +531,6 @@
         </div>
       </div>
 
-      @if (cleanuparr.configured()) {
-        <div class="group-caption">Cleanuparr</div>
-        <div class="info-card">
-          @if (cleanuparr.reachable() && cleanuparr.stats(); as cs) {
-            <div class="info-row"><span>Removed (24 h)</span><span>{{ cs.itemsRemoved }}</span></div>
-            <div class="info-row"><span>Strikes (24 h)</span><span>{{ cs.strikes }}</span></div>
-            @for (j of cs.jobs; track j.name) {
-              <div class="info-row">
-                <span>{{ j.name }}</span>
-                <span [style.color]="j.failed > 0 ? 'var(--warn)' : null">
-                  {{ j.totalRuns }} runs{{ j.failed > 0 ? ' · ' + j.failed + ' failed' : '' }}
-                </span>
-              </div>
-            }
-          } @else {
-            <div class="info-row"><span>Status</span><span style="color: var(--warn)">Unreachable</span></div>
-          }
-        </div>
-      }
 
       <div class="group-caption">Behaviour</div>
       <div class="info-card">
@@ -561,6 +556,78 @@
           <span class="switch" [class.is-on]="behave().wifi"><span class="knob"></span></span>
         </button>
       </div>
+    </div>
+  </div>
+}
+
+<!-- ── Cleanuparr screen (pushed from settings) ── -->
+@if (screen() === 'cleanuparr') {
+  <div class="push-screen push-screen--top" [class.is-closing]="closing()">
+    <nav class="navbar navbar--plain">
+      <button class="nav-back" (click)="back()">
+        <i class="fa-solid fa-chevron-left"></i> Settings
+      </button>
+    </nav>
+    <div class="detail-scroll">
+      <h1 class="settings-title">Cleanuparr</h1>
+
+      <div class="conn-card">
+        <div class="conn-icon" [class]="'conn-icon--' + cleanuparrLabel().tone">
+          <i class="fa-solid" [class]="cleanuparr.status() === 'ok' ? 'fa-check'
+            : cleanuparr.status() === 'unknown' ? 'fa-ellipsis' : 'fa-exclamation'"></i>
+        </div>
+        <div class="conn-text">
+          <div class="conn-title">{{ cleanuparrLabel().text }}</div>
+          <div class="conn-sub">{{ cleanuparrLabel().sub }}</div>
+        </div>
+      </div>
+
+      @if (cleanuparr.status() === 'ok' && cleanuparr.stats(); as cs) {
+        <div class="group-caption">Last 24 hours</div>
+        <div class="speed-card cleanup-card">
+          <div class="speed-col">
+            <div class="speed-label">Removed</div>
+            <div class="speed-value">{{ cs.itemsRemoved }}</div>
+          </div>
+          <div class="speed-col">
+            <div class="speed-label">Strikes</div>
+            <div class="speed-value">{{ cs.strikes }}</div>
+          </div>
+          <div class="speed-col">
+            <div class="speed-label">Events</div>
+            <div class="speed-value">{{ cs.events }}</div>
+          </div>
+        </div>
+
+        <div class="group-caption">Jobs</div>
+        <div class="info-card">
+          @for (j of cs.jobs; track j.name) {
+            <div class="info-row">
+              <span>{{ j.name }}</span>
+              <span [style.color]="j.failed > 0 ? 'var(--warn)' : null">
+                {{ j.totalRuns }} runs{{ j.failed > 0 ? ' · ' + j.failed + ' failed' : '' }}
+              </span>
+            </div>
+          } @empty {
+            <div class="info-row"><span>No jobs reported</span><span></span></div>
+          }
+        </div>
+      } @else if (cleanuparr.status() !== 'unknown') {
+        <div class="info-card">
+          <div class="empty">
+            <div class="empty-title">No data</div>
+            <div class="empty-sub">
+              @if (cleanuparr.status() === 'unauthorized') {
+                Cleanuparr answered but rejected the key. Copy it again from Cleanuparr →
+                account settings into CLEANUPARR_API_KEY.
+              } @else {
+                Set CLEANUPARR_URL to your Cleanuparr container, for example
+                http://cleanuparr:11011.
+              }
+            </div>
+          </div>
+        </div>
+      }
     </div>
   </div>
 }

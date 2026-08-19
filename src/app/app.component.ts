@@ -18,8 +18,8 @@ const SORT_LABEL: Record<Sort, string> = {
 
 const FILTER_FN: Record<Filter, (t: Torrent) => boolean> = {
   all: () => true,
-  active: t => t.dlspeed > 0 || t.upspeed > 0 || t.state === 'downloading',
-  down: t => t.state === 'downloading' || t.state === 'stalled',
+  active: t => t.dlspeed > 0 || t.upspeed > 0 || t.state === 'downloading' || t.state === 'metadata',
+  down: t => t.state === 'downloading' || t.state === 'metadata' || t.state === 'stalled',
   done: t => t.state === 'completed' || t.state === 'seeding',
   paused: t => t.state === 'queued' || t.state === 'paused',
   seeding: t => t.state === 'seeding',
@@ -36,7 +36,7 @@ const FILTER_DOT: Record<Filter, string> = {
 
 // ponytail: fixed rank stands in for the prototype's "curated server order"
 const STATE_RANK: Record<UiState, number> = {
-  error: 0, downloading: 1, stalled: 2, queued: 3, paused: 4, seeding: 5, completed: 6,
+  error: 0, downloading: 1, metadata: 2, stalled: 3, queued: 4, paused: 5, seeding: 6, completed: 7,
 };
 
 const RING_C = 87.96; // 2π·14 — 34px ring, 3px stroke (design/README.md)
@@ -44,6 +44,9 @@ const NO_CAT = '__none__';
 const NO_TAG = '__none__';
 const PUSH_MS = 300;  // push-screen animation (design motion table)
 const SHEET_MS = 340; // sheet up/down
+// ponytail: a download at 0 B/s is normal for a moment; half an hour is not.
+// Raise it if your trackers are slow to warm up.
+const STUCK_AFTER_S = 1800;
 
 interface Behave { resume: boolean; notify: boolean; wifi: boolean; }
 
@@ -83,7 +86,7 @@ export class AppComponent {
   readonly host = location.host;
 
   // ── State (design/README.md "State") ─────────────────────
-  readonly screen = signal<'list' | 'detail' | 'settings'>('list');
+  readonly screen = signal<'list' | 'detail' | 'settings' | 'cleanuparr'>('list');
   readonly closing = signal(false);            // push-screen exit animation
   readonly dtab = signal<'info' | 'files' | 'trackers'>('info');
   readonly filter = signal<Filter>('active');
@@ -193,16 +196,42 @@ export class AppComponent {
     return buildAttention({
       errors: list.filter(t => t.state === 'error').length,
       stalled: list.filter(t => t.state === 'stalled').length,
+      stuck: list.filter(t => this.isStuck(t)).length,
       freeSpace: this.api.server().freeSpace,
       cleanuparr: this.cleanuparr.configured()
         ? {
             configured: true,
+            unauthorized: this.cleanuparr.status() === 'unauthorized',
             reachable: this.cleanuparr.reachable(),
             failedJobs: cp?.failedJobs ?? 0,
             itemsRemoved: cp?.itemsRemoved ?? 0,
           }
         : null,
     });
+  });
+
+  /** A download that says it is running but has not moved a byte in a while. */
+  isStuck(t: Torrent): boolean {
+    return (t.state === 'downloading' || t.state === 'metadata')
+      && t.dlspeed === 0
+      && t.timeActive > STUCK_AFTER_S;
+  }
+
+  readonly cleanuparrLabel = computed(() => {
+    switch (this.cleanuparr.status()) {
+      case 'ok':
+        return { text: 'Connected', sub: 'Stats and strikes available', tone: 'ok' };
+      case 'unauthorized':
+        return { text: 'Key rejected', sub: 'Check CLEANUPARR_API_KEY', tone: 'bad' };
+      case 'unreachable':
+        // Never having reached it is not a fault — the integration is optional.
+        // Losing one that used to work is.
+        return this.cleanuparr.configured()
+          ? { text: 'Not reachable', sub: 'Check CLEANUPARR_URL and the container', tone: 'warn' }
+          : { text: 'Not connected', sub: 'Optional — set CLEANUPARR_URL to enable', tone: 'idle' };
+      default:
+        return { text: 'Checking …', sub: '', tone: 'idle' };
+    }
   });
 
   // Cleanuparr context for the torrent on the detail screen, if it knows it
@@ -257,6 +286,11 @@ export class AppComponent {
   }
 
   statusDetail(t: Torrent): string {
+    // A torrent that claims to be running but has not moved is the case this
+    // line exists for. How long it has been that way is the useful part —
+    // 0 KB/s and ETA ∞ told the user nothing.
+    if (t.state === 'metadata') return `for ${fmtEta(t.timeActive)}`;
+    if (this.isStuck(t)) return `stuck for ${fmtEta(t.timeActive)}`;
     switch (t.state) {
       // ponytail: no percentage here — the progress ring next to it already shows it,
       // and the English labels are long enough to truncate the line on a narrow phone
@@ -269,6 +303,7 @@ export class AppComponent {
       case 'paused': return `${fmtBytes(t.completed)} downloaded`;
       case 'error': return 'Error';
     }
+    return '';
   }
 
   limitLabel(bytesPerSec: number): string {
@@ -276,15 +311,17 @@ export class AppComponent {
   }
 
   // ── Navigation (push 300ms) ──────────────────────────────
-  pushScreen(s: 'detail' | 'settings'): void {
+  pushScreen(s: 'detail' | 'settings' | 'cleanuparr'): void {
     this.closing.set(false);
     this.screen.set(s);
     if (s === 'settings') void this.api.fetchSettings();
   }
 
   back(): void {
+    // Cleanuparr is pushed from settings, so it pops back there, not to the list
+    const target = this.screen() === 'cleanuparr' ? 'settings' : 'list';
     this.closing.set(true);
-    setTimeout(() => { this.screen.set('list'); this.closing.set(false); }, PUSH_MS);
+    setTimeout(() => { this.screen.set(target); this.closing.set(false); }, PUSH_MS);
   }
 
   // ── Swipe (open −152, threshold −70, max −176, <5px = tap) ──

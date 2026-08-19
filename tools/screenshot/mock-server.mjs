@@ -26,6 +26,8 @@ const TORRENTS = {
   h6: t('Spring.2019.1080p.WEB-DL.DDP5.1.x264-DEMO', 'radarr', 5.2 * GB, 0.34, 'stalledDL', 0, 0, 0, 0, 0.07, '/downloads/movies', 1744140140),
   h7: t('Agent.327.Operation.Barbershop.1080p.BluRay-DEMO', 'radarr', 2.3 * GB, 0.12, 'pausedDL', 0, 0, 0, 0, 0.00, '/downloads/movies', 1743140140),
   h8: t('Hero.2018.Grease.Pencil.Demo.1080p.WEB-DL-DEMO', 'tv-sonarr', 1.7 * GB, 0, 'queuedDL', 0, 0, 0, 0, 0.00, '/downloads/tv', 1742140140),
+  // waiting for metadata: no size, no peers, nothing moving
+  h9: t('Glass.Half.2015.Demo.Short.WEB-DL-DEMO', 'tv-sonarr', 0, 0, 'metaDL', 0, 0, 0, 0, 0.00, '/downloads/tv', 1741140140),
 };
 
 const MAINDATA = {
@@ -86,6 +88,7 @@ createServer(async (req, res) => {
 
   if (p === '/cleanuparr/api/stats') {
     if (!process.env['CLEANUPARR']) { res.writeHead(502); return res.end('no cleanuparr'); }
+    if (process.env['CLEANUPARR'] === 'badkey') { res.writeHead(401); return res.end('unauthorized'); }
     return json({
       events: { totalCount: 41 },
       strikes: { totalCount: 12, itemsRemoved: 3 },

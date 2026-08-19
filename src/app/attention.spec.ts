@@ -1,8 +1,8 @@
 import { buildAttention, AttentionInput } from './attention';
 
-const base: AttentionInput = { errors: 0, stalled: 0, freeSpace: 900 * 1024 ** 3, cleanuparr: null };
+const base: AttentionInput = { errors: 0, stalled: 0, stuck: 0, freeSpace: 900 * 1024 ** 3, cleanuparr: null };
 const cp = (o: Partial<NonNullable<AttentionInput['cleanuparr']>> = {}) =>
-  ({ configured: true, reachable: true, failedJobs: 0, itemsRemoved: 0, ...o });
+  ({ configured: true, unauthorized: false, reachable: true, failedJobs: 0, itemsRemoved: 0, ...o });
 
 describe('buildAttention', () => {
   it('stays silent when nothing is wrong and Cleanuparr is absent', () => {
@@ -20,9 +20,22 @@ describe('buildAttention', () => {
     expect(a.action).toBe('torrents');
   });
 
-  it('warns about stalled torrents only when Cleanuparr is not watching', () => {
+  it('warns about stalled torrents whether or not Cleanuparr is watching', () => {
     expect(buildAttention({ ...base, stalled: 3 }).text).toBe('3 stalled');
-    expect(buildAttention({ ...base, stalled: 3, cleanuparr: cp() }).level).toBe('none');
+    expect(buildAttention({ ...base, stalled: 3, cleanuparr: cp() }).text).toBe('3 stalled');
+  });
+
+  it('warns about downloads that have stopped moving', () => {
+    const a = buildAttention({ ...base, stuck: 1 });
+    expect(a.text).toBe('1 stuck');
+    expect(a.action).toBe('torrents');
+  });
+
+  it('tells a rejected key apart from an unreachable host', () => {
+    expect(buildAttention({ ...base, cleanuparr: cp({ unauthorized: true, reachable: false }) }).text)
+      .toBe('Cleanuparr key rejected');
+    expect(buildAttention({ ...base, cleanuparr: cp({ reachable: false }) }).text)
+      .toBe('Cleanuparr unreachable');
   });
 
   it('warns when a configured Cleanuparr goes silent', () => {

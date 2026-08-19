@@ -38,6 +38,9 @@ const SEEN_TTL_MS = 7 * 24 * 3600_000;
 
 @Injectable({ providedIn: 'root' })
 export class CleanuparrService {
+  /** 'unknown' until the first answer. 'unauthorized' means Cleanuparr is
+   *  there but rejected the key — worth telling apart from "not set up". */
+  readonly status = signal<'unknown' | 'ok' | 'unauthorized' | 'unreachable'>('unknown');
   readonly stats = signal<CleanuparrStats | null>(null);
   /** hash (lowercase) → most recent event naming that torrent */
   readonly items = signal<Map<string, CleanuparrItem>>(new Map());
@@ -62,19 +65,31 @@ export class CleanuparrService {
       if (r.ok) {
         this.stats.set(parse(await r.json()));
         this.reachable.set(true);
+        this.status.set('ok');
         void this.fetchEvents();
-        this.configured.set(true);
-        localStorage.setItem(SEEN_KEY, String(Date.now()));
+        this.markSeen();
+      } else if (r.status === 401 || r.status === 403) {
+        // Cleanuparr answered, so it is configured — the key is simply wrong.
+        this.reachable.set(false);
+        this.status.set('unauthorized');
+        this.markSeen();
       } else {
         this.reachable.set(false);
+        this.status.set('unreachable');
       }
     } catch {
       this.reachable.set(false);
+      this.status.set('unreachable');
     }
     // Back off when Cleanuparr was never there — otherwise every minute burns
     // a proxy timeout and a line of nginx error log for nothing.
-    const next = this.reachable() || this.configured() ? POLL_MS : IDLE_MS;
+    const next = this.configured() ? POLL_MS : IDLE_MS;
     this.timer = setTimeout(() => void this.poll(), next);
+  }
+
+  private markSeen(): void {
+    this.configured.set(true);
+    localStorage.setItem(SEEN_KEY, String(Date.now()));
   }
 
   /** Events carry the torrent hash, which is what makes the per-torrent

@@ -161,8 +161,13 @@ layer behind the menu closes it.
    `--t2` detail.
 3. Chevron 8×13, `--t3`.
 
-Status line by state:
+Status line by state (`metadata` was added after the original handoff — folding
+qBittorrent's `metaDL` into `downloading` made a torrent with no size, no peers and no
+progress look like a healthy download):
 * `downloading` → `Downloading` (blue) + `↓ 84.6 KB/s · ETA 4d 8h`
+* `metadata` → `Fetching metadata` (blue) + `for 3d 1h` — no size is known yet, so the
+  tech line omits it and the desktop table shows `–`
+* any downloading torrent at 0 B/s for over 30 min → detail becomes `stuck for 3d 1h`
   (no percentage — the progress ring already carries it, and the English labels would truncate)
 * `seeding` → `Seeding` (green) + `↑ 473.2 KB/s · 263 peers`
 * `completed` → `Complete` (green) + `Ratio 0.55`
@@ -177,11 +182,12 @@ tapping an open row closes it.
 
 **Attention line** (between speed card and control row, added after the original handoff):
 a single row, radius 12, 44px min height, present *only* when something needs the user —
-errored torrents, low free space, or an optional Cleanuparr that is unreachable or has failing
-jobs. Warning variant: `--warn` text on a 14% `--warn` tint. Quiet variant: `--t2` on `--fill`,
+errored, stalled or stuck torrents, low free space, or an optional Cleanuparr that is
+unreachable, rejecting the key, or has failing jobs. Warning variant: `--warn` text on a 14% `--warn` tint. Quiet variant: `--t2` on `--fill`,
 used to report what Cleanuparr cleaned up. Tapping jumps to the affected torrents or to settings.
-Stalled torrents are only reported when no Cleanuparr is configured — otherwise handling them is
-its job and the line would never go dark.
+Stalled and stuck torrents are reported regardless of Cleanuparr: suppressing them left the list
+looking healthy while nothing moved. Whether Cleanuparr is already on it belongs on the detail
+screen, not in this line.
 
 **Empty state** (search/filter with no hits): centred "No matches" 15/590 +
 "Adjust your search or filter." 13px `--t2`, 44px vertical padding.
@@ -211,6 +217,19 @@ Full-screen push over the list.
     Includes `** [DHT] **`, `** [PeX] **`.
 
 ### 3 — Settings (`settings`)
+
+Below the qBittorrent connection card sits a second, tappable card for the optional Cleanuparr
+integration, showing at a glance whether it is set up: green *Connected*, red *Key rejected*
+(Cleanuparr answered but refused the key), amber *Not reachable* (it worked before and is gone
+now) or a neutral grey *Not connected* when it was never configured — the integration is
+optional, so never having it is not a fault. Tapping pushes the Cleanuparr screen.
+
+### 3b — Cleanuparr (`cleanuparr`)
+
+Pushed from settings, pops back to it. Display-font title, the same connection card, a
+three-column card with REMOVED / STRIKES / EVENTS for the last 24 hours, and a JOBS list with
+runs per job type (failures in `--warn`). When it is not connected, an empty state names the
+environment variable to fix instead of showing zeros.
 
 Push screen: "‹ Torrents" back button, then the display-font title "Settings".
 

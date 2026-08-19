@@ -1,16 +1,16 @@
 import { Injectable, computed, signal } from '@angular/core';
 
 // ── UI state model (design/README.md "Screens" §1) ─────────────────────────
-export type UiState = 'downloading' | 'seeding' | 'completed' | 'queued' | 'stalled' | 'paused' | 'error';
+export type UiState = 'downloading' | 'metadata' | 'seeding' | 'completed' | 'queued' | 'stalled' | 'paused' | 'error';
 
 export const STATE_LABEL: Record<UiState, string> = {
-  downloading: 'Downloading', seeding: 'Seeding', completed: 'Complete',
-  queued: 'Queued', stalled: 'Stalled', paused: 'Paused', error: 'Error',
+  downloading: 'Downloading', metadata: 'Fetching metadata', seeding: 'Seeding',
+  completed: 'Complete', queued: 'Queued', stalled: 'Stalled', paused: 'Paused', error: 'Error',
 };
 
 // token name of the state colour — resolved in CSS via var()
 export const STATE_COLOR: Record<UiState, string> = {
-  downloading: '--dl', seeding: '--ok', completed: '--ok',
+  downloading: '--dl', metadata: '--dl', seeding: '--ok', completed: '--ok',
   queued: '--t3', stalled: '--warn', paused: '--warn', error: '--bad',
 };
 
@@ -49,8 +49,12 @@ export interface Tracker { url: string; status: number; peers: number; msg: stri
 
 function mapState(s: string): UiState {
   switch (s) {
-    case 'downloading': case 'forcedDL': case 'metaDL': case 'allocating': case 'checkingDL':
+    case 'downloading': case 'forcedDL': case 'allocating': case 'checkingDL':
       return 'downloading';
+    // Still looking for the torrent's metadata: no size, no files, no progress.
+    // Folding this into "downloading" made a stuck torrent look healthy.
+    case 'metaDL': case 'forcedMetaDL':
+      return 'metadata';
     case 'uploading': case 'forcedUP':
       return 'seeding';
     case 'stalledUP': case 'pausedUP': case 'stoppedUP': case 'checkingUP':

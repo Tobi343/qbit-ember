@@ -24,8 +24,9 @@ straight through your qBittorrent credentials.
 - Add torrents via magnet link, with category and derived save path
 - Light / dark / automatic theme, installable as a PWA on iOS and Android
 - Responsive: phone layout below 900px, three-column desktop above
-- An attention line above the list that appears only when something needs you —
-  errored torrents, low disk space, or a Cleanuparr that has gone quiet
+- An attention line above the list that appears only when something needs you — errored,
+  stalled or stuck torrents, low disk space, or a Cleanuparr that has gone quiet
+- Torrents waiting on metadata are called out as such instead of posing as downloads
 
 ## Stack
 
@@ -66,9 +67,9 @@ Raspberry Pi never have to build it themselves.
 ## Cleanuparr (optional)
 
 If you run [Cleanuparr](https://cleanuparr.github.io/Cleanuparr/), point the container at it and
-its cleanup numbers show up in the attention line, in settings, and — matched on the torrent
-hash — as a strike card on the detail screen, so a stalled download tells you whether something
-is already handling it. Leave it unset and the app
+settings shows whether the connection works (including a rejected API key), a dedicated
+Cleanuparr screen carries the stats, and — matched on the torrent hash — a strike card appears
+on the detail screen, so a stalled download tells you whether something is already handling it. Leave it unset and the app
 behaves exactly as if the integration did not exist — nothing is shown, nothing is polled.
 
 ```yaml

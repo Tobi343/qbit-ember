@@ -16,9 +16,12 @@ export interface Attention {
 export interface AttentionInput {
   errors: number;
   stalled: number;
+  /** downloading or fetching metadata, but nothing has moved for a while */
+  stuck: number;
   freeSpace: number;
   cleanuparr: {
     configured: boolean;
+    unauthorized: boolean;
     reachable: boolean;
     failedJobs: number;
     itemsRemoved: number;
@@ -32,19 +35,24 @@ const LOW_DISK = 50 * 1024 ** 3;
 const plural = (n: number, one: string, many = one + 's') => `${n} ${n === 1 ? one : many}`;
 
 export function buildAttention(input: AttentionInput): Attention {
-  const { errors, stalled, freeSpace, cleanuparr } = input;
+  const { errors, stalled, stuck, freeSpace, cleanuparr } = input;
   const torrentParts: string[] = [];
   const systemParts: string[] = [];
 
   if (errors > 0) torrentParts.push(plural(errors, 'error'));
 
-  // Stalled downloads are Cleanuparr's job. Only nag about them when nothing
-  // is watching them — otherwise the line would be permanently lit.
-  if (stalled > 0 && !cleanuparr?.configured) torrentParts.push(`${stalled} stalled`);
+  // Report stalled and stuck downloads even when Cleanuparr is watching them.
+  // Suppressing them left the list looking healthy while nothing moved, which
+  // is exactly the blind spot this line exists to close — the detail screen is
+  // where "Cleanuparr is already on it" belongs.
+  if (stalled > 0) torrentParts.push(`${stalled} stalled`);
+  if (stuck > 0) torrentParts.push(`${stuck} stuck`);
 
   if (freeSpace > 0 && freeSpace < LOW_DISK) systemParts.push(`only ${fmtBytes(freeSpace)} free`);
 
-  if (cleanuparr?.configured && !cleanuparr.reachable) {
+  if (cleanuparr?.unauthorized) {
+    systemParts.push('Cleanuparr key rejected');
+  } else if (cleanuparr?.configured && !cleanuparr.reachable) {
     systemParts.push('Cleanuparr unreachable');
   } else if (cleanuparr?.reachable && cleanuparr.failedJobs > 0) {
     systemParts.push(`${plural(cleanuparr.failedJobs, 'Cleanuparr job')} failed`);

@@ -475,7 +475,9 @@ h1 {
 
 .table-head, .trow {
   display: grid;
-  grid-template-columns: minmax(240px, 1fr) 84px 132px 100px 96px 96px 76px;
+  /* status widened from the spec's 100px so 'Fetching metadata' fits;
+     the width comes out of the progress column, total is unchanged */
+  grid-template-columns: minmax(240px, 1fr) 84px 100px 132px 96px 96px 76px;
   gap: 12px;
   padding: 9px 16px;
   align-items: center;
@@ -1125,3 +1127,16 @@ h1 {
 /* Long Cleanuparr reasons wrap instead of being cut off mid-sentence */
 .info-row--wrap { align-items: flex-start; }
 .info-row--wrap > span:last-child { white-space: normal; text-align: right; line-height: 1.35; }
+
+/* Connection cards — qBittorrent and the optional Cleanuparr below it */
+.conn-card--btn { width: 100%; text-align: left; margin-top: 10px; }
+.conn-text { flex: 1; min-width: 0; }
+.conn-chev { font-size: 13px; color: var(--t3); flex-shrink: 0; }
+.conn-icon--ok { background: var(--ok); }
+.conn-icon--warn { background: var(--warn); }
+.conn-icon--bad { background: var(--bad); }
+.conn-icon--idle { background: var(--fill); color: var(--t2); }
+.cleanup-card { margin-top: 0; }
+
+/* Cleanuparr sits above settings so popping it reveals settings, not the list */
+.push-screen--top { z-index: 11; }

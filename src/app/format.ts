@@ -62,7 +62,7 @@ export function techLine(name: string, size: number, category: string): string {
   if (src) parts.push(src[1]);
   const codec = name.match(/\b(x265|x264|H\.?26[45]|HEVC|AV1)\b/i);
   if (codec) parts.push(codec[1]);
-  parts.push(fmtBytes(size));
+  if (size > 0) parts.push(fmtBytes(size));  // metaDL torrents have no size yet
   if (category) parts.push(category);
   return parts.join(' · ');
 }
