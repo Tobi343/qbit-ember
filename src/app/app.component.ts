@@ -19,7 +19,7 @@ const SORT_LABEL: Record<Sort, string> = {
 const FILTER_FN: Record<Filter, (t: Torrent) => boolean> = {
   all: () => true,
   active: t => t.dlspeed > 0 || t.upspeed > 0 || t.state === 'downloading' || t.state === 'metadata',
-  down: t => t.state === 'downloading' || t.state === 'metadata' || t.state === 'stalled',
+  down: t => t.state === 'downloading' || t.state === 'stalled',
   done: t => t.state === 'completed' || t.state === 'seeding',
   paused: t => t.state === 'queued' || t.state === 'paused',
   seeding: t => t.state === 'seeding',
@@ -71,7 +71,7 @@ export class AppComponent {
   readonly NO_CAT = NO_CAT;
   readonly NO_TAG = NO_TAG;
   readonly filters: Filter[] = ['active', 'all', 'down', 'done', 'paused'];
-  readonly sideFilters: Filter[] = ['all', 'down', 'seeding', 'completed', 'paused', 'stalled', 'error'];
+  readonly sideFilters: Filter[] = ['active', 'all', 'down', 'seeding', 'completed', 'paused', 'stalled', 'error'];
   readonly sorts: Sort[] = ['status', 'name', 'size', 'progress'];
   readonly themes: Theme[] = ['light', 'dark', 'auto'];
   readonly THEME_LABEL: Record<Theme, string> = { light: 'Light', dark: 'Dark', auto: 'Automatic' };
@@ -90,7 +90,7 @@ export class AppComponent {
   readonly closing = signal(false);            // push-screen exit animation
   readonly dtab = signal<'info' | 'files' | 'trackers'>('info');
   readonly filter = signal<Filter>('active');
-  readonly sideFilter = signal<Filter>('all');
+  readonly sideFilter = signal<Filter>('active');
   readonly catFilter = signal<string | null>(null);   // desktop sidebar
   readonly tagFilter = signal<string | null>(null);
   readonly sort = signal<Sort>('status');

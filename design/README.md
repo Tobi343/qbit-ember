@@ -166,7 +166,8 @@ qBittorrent's `metaDL` into `downloading` made a torrent with no size, no peers 
 progress look like a healthy download):
 * `downloading` → `Downloading` (blue) + `↓ 84.6 KB/s · ETA 4d 8h`
 * `metadata` → `Fetching metadata` (blue) + `for 3d 1h` — no size is known yet, so the
-  tech line omits it and the desktop table shows `–`
+  tech line omits it and the desktop table shows `–`. It counts as *Active* but not as
+  *Downloading*: nothing is being downloaded yet.
 * any downloading torrent at 0 B/s for over 30 min → detail becomes `stuck for 3d 1h`
   (no percentage — the progress ring already carries it, and the English labels would truncate)
 * `seeding` → `Seeding` (green) + `↑ 473.2 KB/s · 263 peers`
@@ -271,7 +272,8 @@ Centred, 56px above the bottom edge, `rgba(30,30,32,0.92)` + blur, white 14/510,
 
 Three columns:
 * **Sidebar 236px** — `rgba(246,246,248,0.92)`, right hairline. Filter field, then groups
-  **STATUS** (All 10, Downloading 1, Seeding 3, Complete 6, Queued 3, Stalled 1, Error 0),
+  **STATUS** (Active first and selected by default, then All 10, Downloading 1, Seeding 3,
+  Complete 6, Queued 3, Stalled 1, Error 0),
   **CATEGORIES** (radarr 6, tv-sonarr 3, prowlarr 0, Uncategorized 1), **TAGS** (Untagged 10).
   Each item: 7px state dot, label, right-aligned count 12px `--t2`. Footer shows Down/Up totals.
 * **Centre** — 52px toolbar ("Torrents" 17/640, "10 total · 1 active" 13px `--t2`, right

@@ -1,5 +1,5 @@
 // Screenshots via CDP — no Puppeteer needed, Node ships a WebSocket client.
-import { spawn } from 'node:child_process';
+import { spawn, execSync } from 'node:child_process';
 import { writeFile, mkdir, rm } from 'node:fs/promises';
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -10,6 +10,9 @@ const PORT = 9333;
 // Fresh profile every run — the app ships a service worker, and a reused
 // profile would serve a stale cached build into the screenshots.
 const PROFILE = '/tmp/qbit-shot-profile';
+// A Chrome left over from an earlier run still owns the debug port, and
+// attaching to it would silently reuse its localStorage — stale screenshots.
+try { execSync(`pkill -f "remote-debugging-port=${PORT}"`); } catch { /* none running */ }
 await rm(PROFILE, { recursive: true, force: true });
 
 const chrome = spawn(CHROME, [
