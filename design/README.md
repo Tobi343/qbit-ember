@@ -175,6 +175,14 @@ Status line by state:
 max −176px. `touch-action: pan-y`. A drag under 5px counts as a tap and opens the detail screen;
 tapping an open row closes it.
 
+**Attention line** (between speed card and control row, added after the original handoff):
+a single row, radius 12, 44px min height, present *only* when something needs the user —
+errored torrents, low free space, or an optional Cleanuparr that is unreachable or has failing
+jobs. Warning variant: `--warn` text on a 14% `--warn` tint. Quiet variant: `--t2` on `--fill`,
+used to report what Cleanuparr cleaned up. Tapping jumps to the affected torrents or to settings.
+Stalled torrents are only reported when no Cleanuparr is configured — otherwise handling them is
+its job and the line would never go dark.
+
 **Empty state** (search/filter with no hits): centred "No matches" 15/590 +
 "Adjust your search or filter." 13px `--t2`, 44px vertical padding.
 

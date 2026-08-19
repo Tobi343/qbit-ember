@@ -70,6 +70,21 @@ createServer(async (req, res) => {
   if (p === '/api/v2/transfer/uploadLimit') return text('0');
   if (p === '/api/v2/torrents/files') return json(FILES);
   if (p === '/api/v2/torrents/trackers') return json(TRACKERS);
+
+  // Cleanuparr is only mocked when CLEANUPARR=1, so the default screenshots
+  // show the app as it looks without the optional integration.
+  if (p === '/cleanuparr/api/stats') {
+    if (!process.env['CLEANUPARR']) { res.writeHead(502); return res.end('no cleanuparr'); }
+    return json({
+      events: { totalCount: 41 },
+      strikes: { totalCount: 12, itemsRemoved: 3 },
+      jobs: { byType: {
+        QueueCleaner: { totalRuns: 288, failed: 0 },
+        MalwareBlocker: { totalRuns: 288, failed: 0 },
+        Seeker: { totalRuns: 24, failed: 0 },
+      } },
+    });
+  }
   if (p.startsWith('/api/')) return text('Ok.');
 
   // static from dist/, else index.html (SPA fallback)

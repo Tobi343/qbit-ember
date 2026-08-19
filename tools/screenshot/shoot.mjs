@@ -19,6 +19,11 @@ const chrome = spawn(CHROME, [
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+if (typeof WebSocket === 'undefined') {
+  console.error('Needs Node 22+ (global WebSocket). Current: ' + process.version);
+  process.exit(1);
+}
+
 async function targetUrl() {
   for (let i = 0; i < 40; i++) {
     try {

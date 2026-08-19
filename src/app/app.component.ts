@@ -1,6 +1,8 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { QbitApiService, STATE_COLOR, STATE_LABEL, Torrent, TorrentFile, Tracker, UiState } from './qbit-api.service';
 import { fmtBytes, fmtDate, fmtEta, fmtRatio, fmtSpeed, techLine } from './format';
+import { CleanuparrService } from './cleanuparr.service';
+import { buildAttention } from './attention';
 
 type Filter = 'active' | 'all' | 'down' | 'done' | 'paused' | 'seeding' | 'completed' | 'stalled' | 'error';
 type Sort = 'status' | 'name' | 'size' | 'progress';
@@ -54,6 +56,7 @@ interface Behave { resume: boolean; notify: boolean; wifi: boolean; }
 })
 export class AppComponent {
   readonly api = inject(QbitApiService);
+  readonly cleanuparr = inject(CleanuparrService);
 
   // re-exported for the template
   readonly STATE_LABEL = STATE_LABEL;
@@ -180,6 +183,25 @@ export class AppComponent {
   readonly detailTorrent = computed(() => {
     const hash = this.sel();
     return this.api.torrents().find(t => t.hash === hash) ?? null;
+  });
+
+  // one line above the list, absent when nothing needs attention
+  readonly attention = computed(() => {
+    const list = this.api.torrents();
+    const cp = this.cleanuparr.stats();
+    return buildAttention({
+      errors: list.filter(t => t.state === 'error').length,
+      stalled: list.filter(t => t.state === 'stalled').length,
+      freeSpace: this.api.server().freeSpace,
+      cleanuparr: this.cleanuparr.configured()
+        ? {
+            configured: true,
+            reachable: this.cleanuparr.reachable(),
+            failedJobs: cp?.failedJobs ?? 0,
+            itemsRemoved: cp?.itemsRemoved ?? 0,
+          }
+        : null,
+    });
   });
 
   // add sheet: derived save path (design §4 "ZIEL")
@@ -421,6 +443,19 @@ export class AppComponent {
 
   toggleBehave(key: keyof Behave): void {
     this.behave.update(b => ({ ...b, [key]: !b[key] }));
+  }
+
+  // Tapping the attention line: either surface the problem torrents (sorting by
+  // status already ranks errors first) or open the settings screen.
+  followAttention(): void {
+    const a = this.attention();
+    if (a.action === 'settings') { this.pushScreen('settings'); return; }
+    if (a.action !== 'torrents') return;
+    this.q.set('');
+    this.sort.set('status');
+    this.dir.set(1);
+    if (this.isDesktop()) this.sideFilter.set('all');
+    else this.filter.set('all');
   }
 
   toggleMenu(which: 'filter' | 'sort' | 'sort-desktop'): void {

@@ -12,4 +12,9 @@ COPY --from=build /app/dist/qbit-ember/browser /usr/share/nginx/html
 # The official nginx image runs envsubst on /etc/nginx/templates/*.template at startup
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 ENV QBIT_API_URL=http://gluetun:8080
+# Optional Cleanuparr integration — left unconfigured the UI simply hides it
+ENV CLEANUPARR_URL=http://cleanuparr:11011
+ENV CLEANUPARR_API_KEY=""
+# Docker's embedded DNS; override when running outside a Docker network
+ENV DNS_RESOLVER=127.0.0.11
 EXPOSE 8091

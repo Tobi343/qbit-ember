@@ -47,6 +47,16 @@
     </div>
   </header>
 
+  @if (attention(); as att) {
+    @if (att.level !== 'none') {
+      <button class="attention" [class.attention--warn]="att.level === 'warn'" (click)="followAttention()">
+        <i class="fa-solid" [class]="att.level === 'warn' ? 'fa-triangle-exclamation' : 'fa-broom'"></i>
+        <span class="attention-text">{{ att.text }}</span>
+        <i class="fa-solid fa-chevron-right attention-chev"></i>
+      </button>
+    }
+  }
+
   <div class="control-row">
     <button class="pill" [class.is-open]="menu() === 'filter'" (click)="toggleMenu('filter')">
       <i class="fa-solid fa-filter"></i>
@@ -342,6 +352,16 @@
       </div>
     </div>
 
+    @if (attention(); as att) {
+      @if (att.level !== 'none') {
+        <button class="attention attention--desktop" [class.attention--warn]="att.level === 'warn'" (click)="followAttention()">
+          <i class="fa-solid" [class]="att.level === 'warn' ? 'fa-triangle-exclamation' : 'fa-broom'"></i>
+          <span class="attention-text">{{ att.text }}</span>
+          <i class="fa-solid fa-chevron-right attention-chev"></i>
+        </button>
+      }
+    }
+
     <div class="table-head">
       <span>Name</span><span>Size</span><span>Progress</span><span>Status</span>
       <span>Down</span><span>Up</span><span>Ratio</span>
@@ -479,6 +499,26 @@
           }
         </div>
       </div>
+
+      @if (cleanuparr.configured()) {
+        <div class="group-caption">Cleanuparr</div>
+        <div class="info-card">
+          @if (cleanuparr.reachable() && cleanuparr.stats(); as cs) {
+            <div class="info-row"><span>Removed (24 h)</span><span>{{ cs.itemsRemoved }}</span></div>
+            <div class="info-row"><span>Strikes (24 h)</span><span>{{ cs.strikes }}</span></div>
+            @for (j of cs.jobs; track j.name) {
+              <div class="info-row">
+                <span>{{ j.name }}</span>
+                <span [style.color]="j.failed > 0 ? 'var(--warn)' : null">
+                  {{ j.totalRuns }} runs{{ j.failed > 0 ? ' · ' + j.failed + ' failed' : '' }}
+                </span>
+              </div>
+            }
+          } @else {
+            <div class="info-row"><span>Status</span><span style="color: var(--warn)">Unreachable</span></div>
+          }
+        </div>
+      }
 
       <div class="group-caption">Behaviour</div>
       <div class="info-card">

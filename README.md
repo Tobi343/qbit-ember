@@ -24,6 +24,8 @@ straight through your qBittorrent credentials.
 - Add torrents via magnet link, with category and derived save path
 - Light / dark / automatic theme, installable as a PWA on iOS and Android
 - Responsive: phone layout below 900px, three-column desktop above
+- An attention line above the list that appears only when something needs you —
+  errored torrents, low disk space, or a Cleanuparr that has gone quiet
 
 ## Stack
 
@@ -61,6 +63,23 @@ On push to `main` (or on `v*` tags) GitHub Actions builds a multi-arch image
 (`linux/arm64` + `linux/amd64`) and pushes it to GHCR, so low-powered hosts like a
 Raspberry Pi never have to build it themselves.
 
+## Cleanuparr (optional)
+
+If you run [Cleanuparr](https://cleanuparr.github.io/Cleanuparr/), point the container at it and
+its cleanup numbers show up in the attention line and in settings. Leave it unset and the app
+behaves exactly as if the integration did not exist — nothing is shown, nothing is polled.
+
+```yaml
+    environment:
+      - CLEANUPARR_URL=http://cleanuparr:11011
+      - CLEANUPARR_API_KEY=<from Cleanuparr → account settings>
+```
+
+The API key is injected by nginx, so it never reaches the browser. The hostname is resolved per
+request, which means an unreachable or unconfigured Cleanuparr answers 502 and the UI hides the
+feature instead of nginx failing to start. Outside a Docker network, also set `DNS_RESOLVER` to a
+reachable DNS server (default is Docker's embedded `127.0.0.11`).
+
 ## Deployment (docker compose / Komodo)
 
 ```yaml
@@ -70,6 +89,9 @@ services:
     container_name: qbit-ember
     environment:
       - QBIT_API_URL=http://gluetun:8080   # qBittorrent WebUI behind Gluetun
+      # optional, see above — omit entirely if you don't run Cleanuparr
+      # - CLEANUPARR_URL=http://cleanuparr:11011
+      # - CLEANUPARR_API_KEY=...
     ports:
       - "8091:8091"
     networks:

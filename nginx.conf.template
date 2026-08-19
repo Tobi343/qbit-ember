@@ -16,4 +16,22 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
+
+    # Optional: Cleanuparr stats. The API key is injected here so it never
+    # reaches the browser. Resolving through a variable keeps the hostname
+    # lookup at request time — an unset or unreachable Cleanuparr then answers
+    # 502 and the UI hides the feature, instead of nginx refusing to start.
+    location /cleanuparr/ {
+        resolver ${DNS_RESOLVER} valid=30s ipv6=off;
+        resolver_timeout 3s;
+        set $cleanuparr_upstream ${CLEANUPARR_URL};
+        rewrite ^/cleanuparr/(.*)$ /$1 break;
+        proxy_pass $cleanuparr_upstream;
+        proxy_http_version 1.1;
+        proxy_set_header X-Api-Key "${CLEANUPARR_API_KEY}";
+        proxy_connect_timeout 3s;
+        proxy_send_timeout 5s;
+        proxy_read_timeout 5s;
+        proxy_intercept_errors off;
+    }
 }
